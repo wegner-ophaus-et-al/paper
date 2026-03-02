@@ -4,6 +4,7 @@ from gamgee.segmenter import SegmentationModel, SegmentationInstance
 from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile as tiff
+import datetime
 
 
 sm_g = SegmentationModel('/Users/julian/Library/Mobile Documents/com~apple~CloudDocs/Documents/General Science/Programming/py/general_analysis/20250722_msam_granule_sizes/gamgee/models/msam/granules/sam_granules_refined_up3_35416497',
@@ -65,6 +66,5 @@ for i, sample_folder_path in enumerate(list_of_sample_folders):
     for a in ax.flatten():
         a.axis('off')
     plt.tight_layout()
-    fig.savefig('contactsheed.pdf', dpi=400)
-
+    fig.savefig(f'{datetime.datetime.now().strftime("%Y%m%d")}_contactsheet.pdf', dpi=400)
 
