@@ -1,4 +1,4 @@
-root = ""
+root = "/Users/julian/local_files/chx_kim/data"
 list = getFileList(root);
 list = Array.sort(list);
 for (i = 0; i < list.length; i++) {
@@ -6,15 +6,15 @@ for (i = 0; i < list.length; i++) {
     // Print index in case, to continue in case of error
     print(i);
     input = root + File.separator + sample_name;
-    open(input + File.separator + "raw" + File.separator + "granules.tif");
+    open(input + File.separator + "imgs" + File.separator + "vasa.tif");
     alfaID = getImageID(); // Store the image ID of alfa.tif
     getDimensions(width, height, _, _, _);
     run("Enhance Contrast...", "saturated=30");
     run("Duplicate...", "title=[Segmentation Helper]");
     run("Gaussian Blur...", "sigma=5");
 	run("Find Edges");
-    open(input + File.separator + "raw" + File.separator + "nanos-rna.tif");
-    open(input + File.separator + "segmentation" + File.separator + "granules.tif");
+    open(input + File.separator + "imgs" + File.separator + "nanos.tif");
+    open(input + File.separator + "segmentations" + File.separator + "vasa.tif");
     granule_segID = getImageID();
     //open(input + File.separator + "segmentation" + File.separator + "granules.tif");
     
@@ -48,7 +48,7 @@ for (i = 0; i < list.length; i++) {
 //    }
 //    
     selectImage(granule_segID);
-    saveAs("tiff", input + File.separator + "segmentation" + File.separator + "granules.tif");
+    saveAs("tiff", input + File.separator + "segmentations" + File.separator + "vasa.tif");
     close();
     
 //    //Load and refine the nucleus segmentation
@@ -66,8 +66,8 @@ for (i = 0; i < list.length; i++) {
 //    
     //Load and refine the cell segmentation
     
-//    open(input + File.separator + "segmentation" + File.separator + "cell.tif");
-    newImage("cell", "8-bit black", width, height, 1);
+    open(input + File.separator + "segmentations" + File.separator + "cell.tif");
+//    newImage("cell", "8-bit black", width, height, 1);
     setMinAndMax(0, 1);
     cell_segID = getImageID();
     run("Tile");
@@ -76,7 +76,7 @@ for (i = 0; i < list.length; i++) {
 		run("Set...", "value=1");
     }
     selectImage(cell_segID);
-    saveAs("tiff", input + File.separator + "segmentation" + File.separator + "cell.tif");
+    saveAs("tiff", input + File.separator + "segmentations" + File.separator + "cell.tif");
     close();
     
 //    // Select the alfa.tif window using its image ID
