@@ -50,3 +50,64 @@ def lsm_metadata(lsm_file_path: Path, raw_time=False):
     )
 
     return meta_data
+
+
+def normalize_image(image, bit_depth=16, saturation_percentile=100):
+    """
+    Normalize image data to a specified bit depth, with optional saturation based on a percentile.
+    Parameters:
+    image (ndarray): Input image data as a NumPy array.
+    bit_depth (int): Desired bit depth for normalization (default is 16).
+    saturation_percentile (float): Percentile for saturation (default is 100 which is the max value).
+
+    Returns:
+    normalized_image (ndarray): Normalized image data as a NumPy array.
+    """
+    max_value = (
+        np.percentile(image, saturation_percentile)
+        if saturation_percentile < 100
+        else image.max()
+    )
+    normalized_image = np.clip(image, 0, max_value) / max_value * (2**bit_depth - 1)
+    if bit_depth == 16:
+        return normalized_image.astype(np.uint16)
+    elif bit_depth == 8:
+        return normalized_image.astype(np.uint8)
+    elif bit_depth == 12:
+        print(
+            "Warning: 12-bit images are often stored in 16-bit containers. Normalizing to 12 bits will still return a 16-bit image with values scaled to the 12-bit range."
+        )
+        return normalized_image.astype(
+            np.uint16
+        )  # 12-bit images are often stored in 16-bit containers
+    elif bit_depth == 32:
+        return normalized_image.astype(np.float32)
+    elif bit_depth == 64:
+        return normalized_image.astype(np.float64)
+    else:
+        raise ValueError(
+            "Unsupported bit depth. Supported values are 8, 16, 32, and 64."
+        )
+
+
+def read_image(image_file_path: Path, saturation_percentile=100):
+    """
+    Read image data from drift corrected image and normalize in 16 bit
+    """
+    return normalize_image(
+        tiff.imread(image_file_path),
+        bit_depth=16,
+        saturation_percentile=saturation_percentile,
+    )
+
+
+def read_mask(mask_file_path: Path):
+    """
+    Read mask data from a TIFF file, returning it as a binary NumPy array.
+    Parameters:
+    mask_file_path (Path): Path to the mask TIFF file.
+
+    Returns:
+    mask (ndarray): Binary mask as a NumPy array where non-zero values are set to 1.
+    """
+    return (tiff.imread(mask_file_path) > 0).astype(np.uint8)
