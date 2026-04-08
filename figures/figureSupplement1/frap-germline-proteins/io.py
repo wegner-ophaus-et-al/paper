@@ -3,6 +3,7 @@ from fitting import recovery_fit
 import tifffile as tiff
 import pandas as pd
 from pathlib import Path
+from typing import Optional
 
 
 def lsm_metadata(lsm_file_path: Path, raw_time=False):
@@ -18,7 +19,7 @@ def lsm_metadata(lsm_file_path: Path, raw_time=False):
     meta_data = {}
 
     with tiff.TiffFile(lsm_file_path) as lsm_file:
-        lsm_meta = lsm_file.lsm_metadata
+        lsm_meta = lsm_file.lsm_metadata if lsm_file.lsm_metadata else {}
 
         bleach_start_time = 0
         bleach_end_time = 0
@@ -111,3 +112,63 @@ def read_mask(mask_file_path: Path):
     mask (ndarray): Binary mask as a NumPy array where non-zero values are set to 1.
     """
     return (tiff.imread(mask_file_path) > 0).astype(np.uint8)
+
+
+def find_file_paths(dir: Path):
+    """
+    Search for all files needed for a FRAP analysis with Phair double normalization
+    """
+
+    file_paths: dict[str, Optional[Path]] = {
+        "lsm_path": None,
+        "image_path": None,
+        "irradiated_mask_path": None,
+        "correction_mask_path": None,
+        "background_mask_path": None,
+    }
+
+    file_paths["lsm_path"] = next(dir.glob("*.lsm"))
+    tif_path = next(dir.glob("*.tif"))
+    if tif_path.stem != file_paths["lsm_path"].stem:
+        print(
+            f"WARNING: LSM and TIFF file names do not match: {file_paths['lsm_path'].name} vs {tif_path.name}"
+        )
+
+    file_paths["image_path"] = tif_path
+
+    masks_subfolder = dir / "masks"
+
+    if not masks_subfolder.exists() or not masks_subfolder.is_dir():
+        # Search for subdolder that contains "mask" in its name
+        masks_subfolder = next(
+            (
+                sub
+                for sub in dir.iterdir()
+                if sub.is_dir() and "mask" in sub.name.lower()
+            ),
+            None,
+        )
+
+    if masks_subfolder is None:
+        raise FileNotFoundError(f"No 'masks' subfolder found in {dir}")
+
+    irradiated_mask_path = next(masks_subfolder.glob("*irrad*.tif"), None)
+    correction_mask_path = next(masks_subfolder.glob("*correction*.tif"), None)
+    background_mask_path = next(masks_subfolder.glob("*background*.tif"), None)
+
+    for mask_type, mask_path in zip(
+        ["irradiated_mask_path", "correction_mask_path", "background_mask_path"],
+        [irradiated_mask_path, correction_mask_path, background_mask_path],
+    ):
+        if mask_path is None or not mask_path.exists():
+            print(
+                f"WARNING: No {mask_type} found in {masks_subfolder} or does not exist."
+            )
+        else:
+            file_paths[mask_type] = mask_path
+
+    for key, path in file_paths.items():
+        if path is None:
+            raise FileNotFoundError(f"{key} is required but was not found in {dir}")
+
+   return file_paths
