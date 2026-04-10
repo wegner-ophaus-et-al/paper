@@ -4,7 +4,7 @@ import tifffile as tiff
 import pandas as pd
 from pathlib import Path
 from typing import Optional
-
+import h5py
 
 def lsm_metadata(lsm_file_path: Path, raw_time=False):
     """
@@ -20,6 +20,16 @@ def lsm_metadata(lsm_file_path: Path, raw_time=False):
 
     with tiff.TiffFile(lsm_file_path) as lsm_file:
         lsm_meta = lsm_file.lsm_metadata if lsm_file.lsm_metadata else {}
+
+        # Take base measurements
+        meta_data.update({
+            "x_size": lsm_meta.get("DimensionX", None),
+            "y_size": lsm_meta.get("DimensionY", None),
+            "time_size": lsm_meta.get("DimensionTime", None),
+            "dtype_raw": lsm_meta.get("DataType", None),
+            "voxel_size_x": lsm_meta.get("VoxelSizeX", None),
+            "voxel_size_y": lsm_meta.get("VoxelSizeY", None),
+        })
 
         bleach_start_time = 0
         bleach_end_time = 0
