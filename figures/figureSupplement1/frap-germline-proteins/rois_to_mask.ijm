@@ -1,4 +1,4 @@
-root = "/Volumes/HELHEIM/analyzed_data/diffusivity/FRAP_germ-granule_components/FRAP_nanos/10hpf";
+root = "/Volumes/HELHEIM/analyzed_data/diffusivity/FRAP_germ-granule_components/FRAP_gra/10hpf";
 
 list = getFileList(root);
 list = Array.sort(list);
@@ -7,6 +7,8 @@ setBatchMode(true);
 
 	for (i = 0; i < list.length; i++) { //
 		g = "processed_" + list[i];
+		roiManager("Deselect");
+		roiManager("Delete");
 		processFile();
 }
 
@@ -31,29 +33,61 @@ function processFile() {
 	if (tiff_file == "") {
 		continue
 	}
+	roiManager("Open", working_dir + File.separator + "csv" + File.separator + "RoiSet.zip");
 //	print(working_dir + tiff_file);
 	open(working_dir + File.separator + tiff_file);
 	tif_width = getWidth();
 	tif_height = getHeight();
 	close();
 	
+	
 	output = working_dir + "masks";
 	File.makeDirectory(output);
 	print(output);
 	
-	// Irradiation area
-	generateMaskfromROI(0, "irradiated", output, tif_width, tif_height);
-	close();
+	roi_count = roiManager("count");
 	
-	// background area
-	generateMaskfromROI(2, "background", output, tif_width, tif_height);
-	close();
-	
-	// correction area
-	generateMaskfromROI(3, "correction", output, tif_width, tif_height);
-	close();
+	if (roi_count == 4) {
+		
+		// Irradiation area
+		generateMaskfromROI(0, "irradiated", output, tif_width, tif_height);
+		close();
+		
+		// background area
+		generateMaskfromROI(2, "background", output, tif_width, tif_height);
+		close();
+		
+		// correction area
+		generateMaskfromROI(3, "correction", output, tif_width, tif_height);
+		close();
+	} else if (roi_count == 3) {
+		// Irradiation area
+		generateMaskfromROI(0, "irradiated", output, tif_width, tif_height);
+		close();
+		
+		// background area
+		generateMaskfromROI(1, "background", output, tif_width, tif_height);
+		close();
+		
+		// correction area
+		generateMaskfromROI(2, "correction", output, tif_width, tif_height);
+		close();
+	} else if (roi_count == 5) {
+		// Irradiation area
+		generateMaskfromROI(2, "irradiated", output, tif_width, tif_height);
+		close();
+		
+		// background area
+		generateMaskfromROI(3, "background", output, tif_width, tif_height);
+		close();
+		
+		// correction area
+		generateMaskfromROI(4, "correction", output, tif_width, tif_height);
+		close();
+	} else {
+		exit("Unexpected number of ROIs: " + roi_count)
+	}
 }
-
 setBatchMode(false);
 
 

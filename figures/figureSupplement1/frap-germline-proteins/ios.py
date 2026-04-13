@@ -1,10 +1,10 @@
 import numpy as np
-from fitting import recovery_fit
 import tifffile as tiff
 import pandas as pd
 from pathlib import Path
 from typing import Optional
 import h5py
+
 
 def lsm_metadata(lsm_file_path: Path, raw_time=False):
     """
@@ -22,14 +22,16 @@ def lsm_metadata(lsm_file_path: Path, raw_time=False):
         lsm_meta = lsm_file.lsm_metadata if lsm_file.lsm_metadata else {}
 
         # Take base measurements
-        meta_data.update({
-            "x_size": lsm_meta.get("DimensionX", None),
-            "y_size": lsm_meta.get("DimensionY", None),
-            "time_size": lsm_meta.get("DimensionTime", None),
-            "dtype_raw": lsm_meta.get("DataType", None),
-            "voxel_size_x": lsm_meta.get("VoxelSizeX", None),
-            "voxel_size_y": lsm_meta.get("VoxelSizeY", None),
-        })
+        meta_data.update(
+            {
+                "x_size": lsm_meta.get("DimensionX", None),
+                "y_size": lsm_meta.get("DimensionY", None),
+                "time_size": lsm_meta.get("DimensionTime", None),
+                "dtype_raw": lsm_meta.get("DataType", None),
+                "voxel_size_x": lsm_meta.get("VoxelSizeX", None),
+                "voxel_size_y": lsm_meta.get("VoxelSizeY", None),
+            }
+        )
 
         bleach_start_time = 0
         bleach_end_time = 0
@@ -46,6 +48,7 @@ def lsm_metadata(lsm_file_path: Path, raw_time=False):
         mean_timestamp_difference = np.diff(positive_timestamps).mean()
 
         count_pre_bleach_frames = np.sum(relative_timestamps < 0)
+
     if raw_time:
         meta_data["raw_time"] = lsm_meta["TimeStamps"]
         meta_data["bleach_start_time"] = bleach_start_time
@@ -181,4 +184,4 @@ def find_file_paths(dir: Path):
         if path is None:
             raise FileNotFoundError(f"{key} is required but was not found in {dir}")
 
-   return file_paths
+    return file_paths
