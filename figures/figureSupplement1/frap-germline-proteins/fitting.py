@@ -11,12 +11,16 @@ def two_phase_exp_model(t, I0, Iinf, tau1, tau2, A):
     return Iinf - (Iinf - I0) * (A * np.exp(-t / tau1) + (1 - A) * np.exp(-t / tau2))
 
 
-def recovery_fit(time, intensity, model="one_phase", low_limit_index=None):
+def recovery_fit(
+    time, intensity, model="one_phase", low_limit_index=None, high_limit_index=None
+):
     if model == "one_phase":
         popt, _ = curve_fit(
             one_phase_exp_model,
-            time[low_limit_index:],
-            intensity[low_limit_index:],  # , bounds=(0, time.max() * 10)
+            time[low_limit_index:high_limit_index],
+            intensity[
+                low_limit_index:high_limit_index
+            ],  # , bounds=(0, time.max() * 10)
         )
         y_pred = one_phase_exp_model(time, *popt)
         rsquared = r2_score(intensity, y_pred)
@@ -32,8 +36,10 @@ def recovery_fit(time, intensity, model="one_phase", low_limit_index=None):
     elif model == "two_phase":
         popt, _ = curve_fit(
             two_phase_exp_model,
-            time[low_limit_index:],
-            intensity[low_limit_index:],  # , bounds=(0, time.max() * 10)
+            time[low_limit_index:high_limit_index],
+            intensity[
+                low_limit_index:high_limit_index
+            ],  # , bounds=(0, time.max() * 10)
         )
         y_pred = two_phase_exp_model(time, *popt)
 

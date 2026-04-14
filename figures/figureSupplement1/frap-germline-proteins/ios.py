@@ -185,3 +185,15 @@ def find_file_paths(dir: Path):
             raise FileNotFoundError(f"{key} is required but was not found in {dir}")
 
     return file_paths
+
+
+def find_sample_dirs(root_dir: Path):
+    """
+    Search for all sample directories in the root directory, excluding hidden folders.
+    Parameters:
+    root_dir (Path): Path to the root directory containing sample subdirectories.
+
+    Returns:
+    sample_dirs (list): List of Paths to sample directories.
+    """
+    return [p for p in root_dir.glob("*") if not p.name.startswith(".") and p.is_dir()]

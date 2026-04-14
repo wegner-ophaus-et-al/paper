@@ -54,3 +54,8 @@ def phair_double_normalization(
         "intensity_background_raw": intensity_background,
         "intensity_normalized": tripple_normalized,
     }
+
+
+def subsample(arr, n):
+    indices = np.linspace(0, len(arr) - 1, n, dtype=int)
+    return arr[indices]
