@@ -1,4 +1,4 @@
-root = "/Volumes/HELHEIM/analyzed_data/diffusivity/FRAP_germ-granule_components/FRAP_gra/10hpf";
+root = "/Volumes/HELHEIM/analyzed_data/diffusivity/202207_FRAP_germ-granule_components/FRAP_nanos/10hpf";
 
 list = getFileList(root);
 list = Array.sort(list);
@@ -7,8 +7,11 @@ setBatchMode(true);
 
 	for (i = 0; i < list.length; i++) { //
 		g = "processed_" + list[i];
+		pre_exec_roi_count = roiManager("count");
+		if (pre_exec_roi_count != 0) {
 		roiManager("Deselect");
 		roiManager("Delete");
+		}
 		processFile();
 }
 
@@ -72,17 +75,17 @@ function processFile() {
 		// correction area
 		generateMaskfromROI(2, "correction", output, tif_width, tif_height);
 		close();
-	} else if (roi_count == 5) {
+	} else if (roi_count > 3) {
 		// Irradiation area
-		generateMaskfromROI(2, "irradiated", output, tif_width, tif_height);
+		generateMaskfromROI(roi_count-3, "irradiated", output, tif_width, tif_height);
 		close();
 		
 		// background area
-		generateMaskfromROI(3, "background", output, tif_width, tif_height);
+		generateMaskfromROI(roi_count-2, "background", output, tif_width, tif_height);
 		close();
 		
 		// correction area
-		generateMaskfromROI(4, "correction", output, tif_width, tif_height);
+		generateMaskfromROI(roi_count-1, "correction", output, tif_width, tif_height);
 		close();
 	} else {
 		exit("Unexpected number of ROIs: " + roi_count)

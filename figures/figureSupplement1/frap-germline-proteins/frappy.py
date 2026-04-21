@@ -2,11 +2,22 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 from pathlib import Path
-from ios import lsm_metadata, read_image, read_mask, find_file_paths, find_sample_dirs
+from typing import Optional
+import h5py
+from ios import (
+    lsm_metadata,
+    read_image,
+    read_mask,
+    find_file_paths,
+    find_sample_dirs,
+    write_dict_to_hdf_group,
+    write_dataframe_to_hdf_group,
+)
 from fitting import recovery_fit
 from calculator import phair_double_normalization, subsample
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import time
 
 
@@ -115,6 +126,7 @@ class FrapSample:
         for idx, time_point in enumerate(self.data["time"]):
             dict_data.append(
                 {
+                    "sample_name": self.metadata["sample_name"],
                     "time": time_point,
                     "index": self.data["index"][idx],
                     "normalized_intensity": self.data["normalized_intensity"][idx],
@@ -127,6 +139,7 @@ class FrapSample:
                     "intensity_background_raw": self.data["all_intensities"][
                         "intensity_background_raw"
                     ][idx],
+                    "time_delta": self.metadata["mean_timestamp_difference"],
                 }
             )
         return dict_data
@@ -151,17 +164,17 @@ class FrapSample:
             ax=axes[0],
             markers=True,
             dashes=True,
-            palette="gray",
+            # palette="gray",
         )
         sns.lineplot(
-            x=self.data["time"],
+            x=self.data["fit_values"]["time"],
             y=self.data["fit_values"]["fitted_intensity"],
             ax=axes[0],
             label=f"Fit ({self.fit_type})",
-            palette="red",
+            # palette="red",
         )
         axes[0].set_title(
-            f"FRAP Recovery Curve (tau = {self.data['fit_params']['tau']:.2f} s)"
+            f"{self.root.name} Recovery Curve (tau = {self.data['fit_params']['tau']:.2f} s)"
         )
         axes[0].set_xlabel("Time (s)")
         axes[0].set_ylabel("Normalized Intensity")
@@ -196,7 +209,9 @@ class FrapSample:
             cmap="gray",
             vmax=pre_bleach_vmax,
         )
-        axes[2].contour(self.masks["irradiated"], colors="r", linewidths=0.5)
+        axes[2].contour(self.masks["irradiated"], colors="royalblue", linewidths=0.5)
+        axes[2].contour(self.masks["reference"], colors="orange", linewidths=0.5)
+        axes[2].contour(self.masks["background"], colors="green", linewidths=0.5)
         axes[2].set_title("Pre-bleach Image")
 
         axes[3].imshow(
@@ -220,12 +235,62 @@ class FrapSample:
             plt.show()
 
     def export_to_hdf(self, hdf_path: Path, experiment_name: str):
-        pass
+        hdf_path = Path(hdf_path)
+
+        with h5py.File(hdf_path, "a") as hdf_file:
+            samples_group = hdf_file.require_group(experiment_name).require_group(
+                "FrapSamples"
+            )
+
+            if self.metadata["sample_name"] in samples_group:
+                del samples_group[self.metadata["sample_name"]]
+            sample_group = samples_group.create_group(self.metadata["sample_name"])
+
+            images_group = sample_group.create_group("images")
+            images_group.create_dataset("image_sequence", data=self.image_sequence)
+            images_group.create_dataset(
+                "mask_irradiated", data=self.masks["irradiated"].astype(np.uint8)
+            )
+            images_group.create_dataset(
+                "mask_background", data=self.masks["background"].astype(np.uint8)
+            )
+            images_group.create_dataset(
+                "mask_reference", data=self.masks["reference"].astype(np.uint8)
+            )
+
+            metadata_group = sample_group.create_group("meta_data")
+            write_dict_to_hdf_group(metadata_group, self.metadata)
+
+            intensity_data_group = sample_group.create_group("intensity_data")
+            intensity_data = {
+                "time": self.data["time"],
+                "index": self.data["index"],
+                "normalized_intensity": self.data["normalized_intensity"],
+                "intensity_irradiated_raw": self.data["all_intensities"][
+                    "intensity_irradiated_raw"
+                ],
+                "intensity_reference_raw": self.data["all_intensities"][
+                    "intensity_reference_raw"
+                ],
+                "intensity_background_raw": self.data["all_intensities"][
+                    "intensity_background_raw"
+                ],
+            }
+            write_dict_to_hdf_group(intensity_data_group, intensity_data)
+
+            fit_data_group = sample_group.create_group("fit_data")
+            fit_data = {
+                "fit_type": self.fit_type,
+                "fit_params": self.data["fit_params"],
+                "fit_values": self.data["fit_values"],
+            }
+            write_dict_to_hdf_group(fit_data_group, fit_data)
 
 
 class FrapExperiment:
-    def __init__(self, root_dir: Path):
+    def __init__(self, root_dir: Path, name=None):
         self.root = root_dir
+        self.name = root_dir.name if name is None else name
         self.logs = {}
         self.sample_paths = find_sample_dirs(root_dir)
         self.samples = []
@@ -236,16 +301,26 @@ class FrapExperiment:
         self.fit_params = {}
         self.fit_values = {}
 
+        self.df_averaged = pd.DataFrame()
+        self.timepoint_dicts = []
+
         for sample_path in self.sample_paths:
             log_message("Loading sample...", self.logs, sample_path.name)
-            try:
-                self.samples.append(FrapSample(sample_path))
-                self.logs.update({k: v for k, v in self.samples[-1].logs.items()})
-                log_message("Sample loaded successfully.", self.logs, sample_path.name)
-            except Exception as error:
-                log_message(
-                    f"Failed to load sample: {error}", self.logs, sample_path.name
-                )
+            # try:
+            self.samples.append(FrapSample(sample_path))
+            self.logs.update({k: v for k, v in self.samples[-1].logs.items()})
+            log_message("Sample loaded successfully.", self.logs, sample_path.name)
+            # # except Exception as error:
+            #     log_message(
+            #         f"Failed to load sample: {error}", self.logs, sample_path.name
+            #     )
+            #
+        for ts, msg in self.logs.items():
+            print(f"{ts} - {msg}")
+
+        self.process_sample_data()
+
+        self.overview_figure_samples()
 
     def get_dataframes(self):
         df_meta = pd.DataFrame([fs.metadata for fs in self.samples])
@@ -263,14 +338,28 @@ class FrapExperiment:
             sample_dict_data = sample.generate_dict_data()
             all_data.extend(sample_dict_data)
 
+        self.timepoint_dicts = all_data
         df = pd.DataFrame(all_data)
+        if df.empty:
+            log_message(
+                "No data available to create DataFrame.", self.logs, self.root.name
+            )
+            return pd.DataFrame(), pd.DataFrame()
 
-        df_averaged = df.groupby("index").mean()
+        # Mean of all non-string columns grouped by index (time point) to get the average recovery curve for the experiment
+        columns_to_average = df.select_dtypes(include=np.number).columns.tolist()
+        df_averaged = df.groupby("index")[columns_to_average].mean()
 
         return df, df_averaged
 
     def process_sample_data(self):
         df, df_averaged = self.generate_experiment_df()
+
+        if df.empty or df_averaged.empty:
+            log_message(
+                "No data available to process sample data.", self.logs, self.root.name
+            )
+            return None
 
         number_of_pre_bleach_frames = df_averaged[df_averaged.index < 0][
             "normalized_intensity"
@@ -280,57 +369,131 @@ class FrapExperiment:
         quantity_threshold = 0.7
         max_samples = df.groupby("index").count()["normalized_intensity"].max()
         count_over_time = df.groupby("index").count()["normalized_intensity"]
-        index_threshold = count_over_time[
-            count_over_time < quantity_threshold * max_samples
-        ].index[0]
-
-        print(
-            df_averaged.loc[index_threshold],
-            " is the time point where there are less than 70% of the maximum samples left",
-        )
+        if count_over_time[count_over_time < quantity_threshold * max_samples].empty:
+            index_threshold = None
+        else:
+            index_threshold = count_over_time[
+                count_over_time < quantity_threshold * max_samples
+            ].index[0]
+        self.df_averaged = df_averaged
         self.fit_params, self.fit_values = recovery_fit(
             df_averaged["time"],
             df_averaged["normalized_intensity"],
             low_limit_index=number_of_pre_bleach_frames,
             high_limit_index=index_threshold,
+            model="one_phase_fixed_zero",
         )
-        print(self.fit_params)
+        if len(df_averaged["time"]) == len(self.fit_values["fitted_intensity"]):
+            self.df_averaged["fitted_intensity"] = self.fit_values["fitted_intensity"]
+        else:
+            print("They dont match")
 
-    def generate_report(self):
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    def generate_report(self, ax=None):
+
+        if ax is None:
+            fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+            save_plot = True
+        else:
+            save_plot = False
 
         df, df_averaged = self.generate_experiment_df()
+        max_time = df_averaged["time"].max()
+        next_lower_five = max_time - (max_time % 20)
+        time_delta_mean = df_averaged["time_delta"].mean()
+        time_points = np.arange(0, next_lower_five, 20)
+        time_point_labels = np.round(time_points * time_delta_mean, 2)
 
         # Make lineplot with index and rename axis with averaged time values
         sns.lineplot(
             df,
             x="index",
             y="normalized_intensity",
-            ax=axes[0],
+            ax=ax,
             label="Individual Samples",
+            errorbar="sd",
         )
         sns.lineplot(
             x=self.fit_values["time"].index,
             y=self.fit_values["fitted_intensity"],
-            ax=axes[0],
+            ax=ax,
         )
-        axes[0].axvline(0, color="red", linestyle="--", label="Bleach Time")
-        axes[0].set_xlim(None, max(self.fit_values["time"].index))
-        axes[0].set_xlabel("Time (s)")
-        axes[0].set_ylabel("Normalized Intensity")
-        axes[0].set_title("FRAP Recovery Curves")
-        axes[0].set_xticks(subsample(np.asarray(df_averaged.index), 10))
-        axes[0].set_xticklabels(subsample(np.asarray(df_averaged["time"].round(2)), 10))
+        ax.axvline(0, color="red", linestyle="--", label="Bleach Time")
+        ax.set_xlim(None, max(self.fit_values["time"].index))
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Normalized Intensity")
+        ax.set_title("FRAP Recovery Curves")
+        ax.set_xticks(time_points)
+        ax.set_xticklabels(time_point_labels)
+        # ax.set_xticks(np.arange(0, next_lower_five + 5, 5))
+        # ax.set_xticklabels(
+        #     np.round(np.arange(0, next_lower_five + 5, 5) * time_delta_mean, 2)
+        # )
+        # # ax.set_xticks(subsample(np.asarray(df_averaged.index), 10))
+        # ax.set_xticklabels(subsample(np.asarray(df_averaged["time"].round(2)), 10))
 
-        # On the second subplot, plot the number of samoles contributing to each time point as a bar plot
-        sns.barplot(
-            data=df.groupby("index").count().reset_index(),
-            x="index",
-            y="normalized_intensity",
-            ax=axes[1],
+        if save_plot:
+            plt.tight_layout()
+            fig.savefig(self.root / f"{self.root.name}_experiment_report.pdf")
+            plt.show()
+
+    def overview_figure_samples(self):
+
+        number_of_samples = len(self.samples)
+
+        fig = plt.figure(figsize=(21, 3 * number_of_samples))
+        gs = gridspec.GridSpec(
+            number_of_samples, 7, figure=fig, height_ratios=[1] * number_of_samples
         )
-        axes[1].set_xlabel("Time (s)")
-        axes[1].set_ylabel("Number of Samples")
-        axes[1].set_title("Sample Contribution Over Time")
+        for i, sample in enumerate(self.samples):
+            try:
+                ax0 = fig.add_subplot(gs[i, :2])
+                ax1 = fig.add_subplot(gs[i, 2:4])
+                ax2 = fig.add_subplot(gs[i, 4])
+                ax3 = fig.add_subplot(gs[i, 5])
+                ax4 = fig.add_subplot(gs[i, 6])
 
-        plt.show()
+                sample.generate_report(axes=[ax0, ax1, ax2, ax3, ax4])
+            except Exception as e:
+                print(f"Error processing sample at {sample.root}: {e}")
+
+        sns.despine()
+        plt.tight_layout()
+        plt.savefig(self.root / f"{self.name}_overview.pdf")
+        plt.close(fig)
+
+    def export_to_hdf(self, hdf_path: Path, experiment_name: Optional[str] = None):
+
+        hdf_path = Path(hdf_path)
+        experiment_name = experiment_name or self.metadata["experiment_name"]
+
+        with h5py.File(hdf_path, "a") as hdf_file:
+            if experiment_name in hdf_file:
+                del hdf_file[experiment_name]
+
+            experiment_group = hdf_file.create_group(experiment_name)
+
+            metadata_group = experiment_group.create_group("meta_data")
+            write_dict_to_hdf_group(metadata_group, self.metadata)
+
+            experiment_group.create_group("FrapSamples")
+
+        for sample in self.samples:
+            sample.export_to_hdf(hdf_path=hdf_path, experiment_name=experiment_name)
+
+        df, df_averaged = self.generate_experiment_df()
+
+        with h5py.File(hdf_path, "a") as hdf_file:
+            experiment_group = hdf_file[experiment_name]
+            composed_data_group = experiment_group.create_group("ComposedData")
+            data_group = composed_data_group.create_group("Data")
+
+            write_dataframe_to_hdf_group(data_group.create_group("df"), df)
+            write_dataframe_to_hdf_group(
+                data_group.create_group("df_averaged"), df_averaged
+            )
+            write_dict_to_hdf_group(
+                data_group.create_group("fit_params"), self.fit_params
+            )
+            write_dict_to_hdf_group(
+                data_group.create_group("fit_values"), self.fit_values
+            )

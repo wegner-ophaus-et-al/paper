@@ -127,7 +127,7 @@ def read_mask(mask_file_path: Path):
     return (tiff.imread(mask_file_path) > 0).astype(np.uint8)
 
 
-def find_file_paths(dir: Path):
+def find_file_paths(dir: Path, verbose=False):
     """
     Search for all files needed for a FRAP analysis with Phair double normalization
     """
@@ -143,9 +143,10 @@ def find_file_paths(dir: Path):
     file_paths["lsm_path"] = next(dir.glob("*.lsm"))
     tif_path = next(dir.glob("*.tif"))
     if tif_path.stem != file_paths["lsm_path"].stem:
-        print(
-            f"WARNING: LSM and TIFF file names do not match: {file_paths['lsm_path'].name} vs {tif_path.name}"
-        )
+        if verbose:
+            print(
+                f"WARNING: LSM and TIFF file names do not match: {file_paths['lsm_path'].name} vs {tif_path.name}"
+            )
 
     file_paths["image_path"] = tif_path
 
@@ -197,3 +198,69 @@ def find_sample_dirs(root_dir: Path):
     sample_dirs (list): List of Paths to sample directories.
     """
     return [p for p in root_dir.glob("*") if not p.name.startswith(".") and p.is_dir()]
+
+
+def _ensure_hdf_key(value: str) -> str:
+    return str(value).replace("/", "_")
+
+
+def _to_hdf_compatible(value):
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, pd.Series):
+        return value.to_numpy()
+    if isinstance(value, (list, tuple)):
+        value = np.asarray(value)
+
+    if isinstance(value, np.ndarray):
+        if value.dtype.kind in {"O", "U"}:
+            return np.asarray(value, dtype=h5py.string_dtype(encoding="utf-8"))
+        return value
+
+    if value is None:
+        return "None"
+
+    if isinstance(value, str):
+        return np.asarray(value, dtype=h5py.string_dtype(encoding="utf-8"))
+
+    return value
+
+
+def _overwrite_group_item(group: h5py.Group, key: str):
+    if key in group:
+        del group[key]
+
+
+def write_dataframe_to_hdf_group(group: h5py.Group, dataframe: pd.DataFrame):
+    index_name = dataframe.index.name or "index"
+    group.attrs["index_name"] = index_name
+    group.attrs["index_dataset"] = "__index__"
+
+    index_values = _to_hdf_compatible(dataframe.index.to_numpy())
+    _overwrite_group_item(group, "__index__")
+    group.create_dataset("__index__", data=index_values)
+
+    for column_name in dataframe.columns:
+        key = _ensure_hdf_key(column_name)
+        values = _to_hdf_compatible(dataframe[column_name].to_numpy())
+        _overwrite_group_item(group, key)
+        group.create_dataset(key, data=values)
+
+
+def write_dict_to_hdf_group(group: h5py.Group, data: dict):
+    for key, value in data.items():
+        hdf_key = _ensure_hdf_key(key)
+        _overwrite_group_item(group, hdf_key)
+
+        if isinstance(value, dict):
+            subgroup = group.create_group(hdf_key)
+            write_dict_to_hdf_group(subgroup, value)
+            continue
+
+        if isinstance(value, pd.DataFrame):
+            subgroup = group.create_group(hdf_key)
+            write_dataframe_to_hdf_group(subgroup, value)
+            continue
+
+        compatible_value = _to_hdf_compatible(value)
+        group.create_dataset(hdf_key, data=compatible_value)
