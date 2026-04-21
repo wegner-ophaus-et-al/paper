@@ -32,7 +32,7 @@ def recovery_fit(
 
         fit_values = {
             "time": time[low_limit_index:high_limit_index],
-            "fitted_intensity": y_pred[low_limit_index:high_limit_index],
+            "fitted_intensity": y_pred,
         }
 
         return params, fit_values

@@ -387,6 +387,25 @@ class FrapExperiment:
             self.df_averaged["fitted_intensity"] = self.fit_values["fitted_intensity"]
         else:
             print("They dont match")
+            # Where time of df_averaged < 0, set fitted intensity to nan then shift the fitted intensity so they start at the first positive time point of the averaged dataframe, then assign the shifted fitted intensity to the averaged dataframe, expect the df_averaged to be larger that the fitted intensity values since the fitted values only start at the first positive time point of the averaged dataframe, so the first part of the fitted intensity values will be nan and then the rest will be the shifted fitted intensity values
+            fit_time = self.fit_values["time"]
+            fit_intensity = self.fit_values["fitted_intensity"]
+            fit_intensity_shifted = np.full_like(df_averaged["time"], np.nan)
+            # fit_intensity_shifted[df_averaged["time"] >= fit_time[0]] =
+
+            print("Data frame / series lengths and heads:")
+            print(f"len() df_averaged time: {len(df_averaged['time'])}")
+            print(f"len() fit_time: {len(fit_time)}")
+            print("df_averaged head:")
+            print(df_averaged.head(7))
+            print(fit_intensity_shifted[:10])
+
+            if len(df_averaged["time"]) == len(fit_intensity_shifted):
+                # self.df_averaged["fitted_intensity"] = fit_intensity_shifted
+                pass
+            else:
+                print("They still dont match")
+            # TODO: Find a way to shift the fitted intensity values to match the time points of the averaged dataframe without using interpolation, maybe by finding the index of the time point in the averaged dataframe that is closest to each time point in the fitted values and assigning the fitted intensity value to that index in the averaged dataframe
 
     def generate_report(self, ax=None):
 
@@ -445,16 +464,16 @@ class FrapExperiment:
             number_of_samples, 7, figure=fig, height_ratios=[1] * number_of_samples
         )
         for i, sample in enumerate(self.samples):
-            try:
-                ax0 = fig.add_subplot(gs[i, :2])
-                ax1 = fig.add_subplot(gs[i, 2:4])
-                ax2 = fig.add_subplot(gs[i, 4])
-                ax3 = fig.add_subplot(gs[i, 5])
-                ax4 = fig.add_subplot(gs[i, 6])
+            # try:
+            ax0 = fig.add_subplot(gs[i, :2])
+            ax1 = fig.add_subplot(gs[i, 2:4])
+            ax2 = fig.add_subplot(gs[i, 4])
+            ax3 = fig.add_subplot(gs[i, 5])
+            ax4 = fig.add_subplot(gs[i, 6])
 
-                sample.generate_report(axes=[ax0, ax1, ax2, ax3, ax4])
-            except Exception as e:
-                print(f"Error processing sample at {sample.root}: {e}")
+            sample.generate_report(axes=[ax0, ax1, ax2, ax3, ax4])
+            # except Exception as e:
+            #     print(f"Error processing sample at {sample.root}: {e}")
 
         sns.despine()
         plt.tight_layout()
