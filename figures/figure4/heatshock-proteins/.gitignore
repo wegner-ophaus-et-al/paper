@@ -3,3 +3,4 @@ anaconda_projects/db
 data/seg_test
 .DS_Store
 Untitled.ipynb
+__pycache__

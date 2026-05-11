@@ -29,7 +29,7 @@ def crop_image_with_mask(image, mask):
 
 projection = "max"  # or "avg", "min", "sum"
 
-root = Path("/Users/julian/local_files/20260428_stress-granules_HS")
+root = Path("/Users/julian/local_files/20260505_heat-shock/")
 
 constucts = ["F617", "F618"]
 
@@ -99,4 +99,3 @@ for construct_name in constucts:
                 tiff.imwrite(
                     img_out_dir / f"{name}.tif", normalize_image(img_proj[ch_idx])
                 )
-
