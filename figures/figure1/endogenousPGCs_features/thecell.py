@@ -20,6 +20,8 @@ class TheCell:
         conditions=[],
         model_handler=None,
         model_handler_id: str | None = None,
+        granuleA="dnd1",
+        granuleB="gra",
     ):
         self.logs = {}
         path = Path(path) if isinstance(path, str) else path
@@ -54,6 +56,9 @@ class TheCell:
         self.condition = cell_condition
         self.stage = dev_stage
         self.name = file_name
+
+        self.granuleA = granuleA
+        self.granuleB = granuleB
 
         self.log(
             f"Initialized cell with UID: {self.uid}, acquisition date: {self.acquisition_date}, condition: {self.condition}"
@@ -96,14 +101,14 @@ class TheCell:
     def _populate_markers(self, model_handler):
         images_dir = self.path / "images"
         return {
-            "dnd1": Marker(
+            self.granuleA: Marker(
                 image_path=images_dir / "dnd1.tif",
                 parent_name=self.name,
                 parent_id=self.uid,
                 model_handler=model_handler,
                 compartment="granules",
             ),
-            "gra": Marker(
+            self.granuleB: Marker(
                 image_path=images_dir / "granulito.tif",
                 parent_name=self.name,
                 parent_id=self.uid,
@@ -161,14 +166,18 @@ class TheCell:
 
         ax[0].imshow(self.markers["nucleus"].raw_image, cmap="gray")
         ax[1].imshow(
-            self.markers["dnd1"].raw_image,
+            self.markers[self.granuleA].raw_image,
             cmap="gray",
-            vmax=np.percentile(self.markers["dnd1"].raw_image, granule_percentile),
+            vmax=np.percentile(
+                self.markers[self.granuleA].raw_image, granule_percentile
+            ),
         )
         ax[2].imshow(
-            self.markers["gra"].raw_image,
+            self.markers[self.granuleB].raw_image,
             cmap="gray",
-            vmax=np.percentile(self.markers["gra"].raw_image, granule_percentile),
+            vmax=np.percentile(
+                self.markers[self.granuleB].raw_image, granule_percentile
+            ),
         )
 
         ax[0].contour(
@@ -183,15 +192,17 @@ class TheCell:
         )
 
         ax[1].imshow(
-            self.markers["dnd1"].segmentation,
+            self.markers[self.granuleA].segmentation,
             cmap=segmentation_cmap,
-            alpha=(self.markers["dnd1"].segmentation > 0).astype(float) * granule_alpha,
+            alpha=(self.markers[self.granuleA].segmentation > 0).astype(float)
+            * granule_alpha,
         )
 
         ax[2].imshow(
-            self.markers["gra"].segmentation,
+            self.markers[self.granuleB].segmentation,
             cmap=segmentation_cmap,
-            alpha=(self.markers["gra"].segmentation > 0).astype(float) * granule_alpha,
+            alpha=(self.markers[self.granuleB].segmentation > 0).astype(float)
+            * granule_alpha,
         )
 
         ax[0].text(
@@ -207,7 +218,7 @@ class TheCell:
     def clean_segmentations(self):
 
         # Delete segmentations outside of the cell segmentation
-        for marker_name in ["dnd1", "gra", "nucleus"]:
+        for marker_name in [self.granuleA, self.granuleB, "nucleus"]:
             self.markers[marker_name].segmentation[
                 self.markers["cell"].segmentation == 0
             ] = 0
@@ -223,8 +234,8 @@ class TheCell:
         data_collector.update(
             {
                 "granule_features": {
-                    "dnd1": self.markers["dnd1"].get_features(),
-                    "gra": self.markers["gra"].get_features(),
+                    self.granuleA: self.markers[self.granuleA].get_features(),
+                    self.granuleB: self.markers[self.granuleB].get_features(),
                 }
             }
         )
@@ -248,7 +259,7 @@ class TheCell:
         )
 
         # Get nuclear distance features
-        for marker_name in ["dnd1", "gra"]:
+        for marker_name in [self.granuleA, self.granuleB]:
             data_collector["granule_features"][marker_name][
                 "NuclearDistanceFeatures"
             ] = features.nuclear_distance_features(
@@ -259,28 +270,28 @@ class TheCell:
         # Get dnd1 and gra co-localization features
         coloc_features = {
             "MandersPercentile": features.manders_across_percentiles(
-                self.markers["dnd1"].raw_image,
-                self.markers["gra"].raw_image,
+                self.markers[self.granuleA].raw_image,
+                self.markers[self.granuleB].raw_image,
                 mask=self.markers["cell"].segmentation > 0,
             ),
             "MandersSegmentationsM1": features.manders(
-                self.markers["dnd1"].raw_image,
-                self.markers["gra"].segmentation > 0,
+                self.markers[self.granuleA].raw_image,
+                self.markers[self.granuleB].segmentation > 0,
                 mask=self.markers["cell"].segmentation > 0,
             ),
             "MandersSegmentationsM2": features.manders(
-                self.markers["gra"].raw_image,
-                self.markers["dnd1"].segmentation > 0,
+                self.markers[self.granuleB].raw_image,
+                self.markers[self.granuleA].segmentation > 0,
                 mask=self.markers["cell"].segmentation > 0,
             ),
             "Pearson": features.pearson(
-                self.markers["dnd1"].raw_image,
-                self.markers["gra"].raw_image,
+                self.markers[self.granuleA].raw_image,
+                self.markers[self.granuleB].raw_image,
                 mask=self.markers["cell"].segmentation > 0,
             ),
             "IoU": features.iou(
-                self.markers["dnd1"].segmentation > 0,
-                self.markers["gra"].segmentation > 0,
+                self.markers[self.granuleA].segmentation > 0,
+                self.markers[self.granuleB].segmentation > 0,
             ),
         }
         data_collector["granule_features"]["colocalization"] = coloc_features
