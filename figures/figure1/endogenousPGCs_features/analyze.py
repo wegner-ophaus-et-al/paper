@@ -1,6 +1,11 @@
 from pathlib import Path
 import pickle
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from utils import print_nested
+from plotting import plot_individial_granule_profile, contact_sheet
+
 
 data_dir = Path(__file__).parent / "data"
 
@@ -13,20 +18,19 @@ for cell_dir in data_dir.iterdir():
         cell_objects.append(cell)
 
 
-def contact_sheet(list_of_cells: list, save_dir: Path):
-    """
-    Generate a contanct sheet for all cells in the list
-    """
-    fig, axs = plt.subplots(len(list_of_cells), 3, figsize=(10, 4 * len(list_of_cells)))
-    for ax, cell in zip(axs, list_of_cells):
-        cell.plot_markers_on_axis(ax, segmentation_cmap="summer")
-        for a in ax:
-            a.axis("off")
-    fig.savefig(save_dir / "contact_sheet.pdf")
-
-
+data = []
 for cell in cell_objects:
-    for marker in cell.markers.values():
-        if marker.compartment.lower() == "granules":
-            marker.features = marker.get_features()
-            print(marker.features.keys())
+    # cell.clean_segmentations()
+    # cell.compute_features()
+
+    with open(cell.path / "thecell.pkl", "wb") as f:
+        pickle.dump(cell, f)
+
+    data.extend(cell.get_granule_features())
+
+
+df = pd.DataFrame(data)
+df.to_pickle(data_dir / "granule_features.pkl")
+df.to_csv(data_dir / "granule_features.csv")
+
+plot_individial_granule_profile(df, data_dir)

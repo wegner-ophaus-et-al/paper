@@ -9,19 +9,19 @@ from multiprocessing import Pool
 import pickle
 from tqdm import tqdm
 
-print("Before model handler")
 model_handler = ModelHandler()
-print("after model handler")
 
 
-sample_dir = Path(__file__).parent / "data"
+sample_dir = Path(
+    "/Volumes/icb_remote/Documents/JW/py/data/endogenous_PGCs_size_characterization/8hpf"
+)
 cell_objects = []
 
 # Initialize cell objects
 for test_cell in sample_dir.iterdir():
     if test_cell.is_dir():
         print(f"Processing cell at {test_cell}")
-        cell_obj = TheCell(test_cell)
+        cell_obj = TheCell(test_cell, conditions=["ctrl", "kd"])
         cell_objects.append(cell_obj)
 
 # Segment marks in paralel

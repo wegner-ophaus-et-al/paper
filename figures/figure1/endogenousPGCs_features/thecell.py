@@ -56,6 +56,7 @@ class TheCell:
         self.condition = cell_condition
         self.stage = dev_stage
         self.name = file_name
+        self.features: dict = {}
 
         self.granuleA = granuleA
         self.granuleB = granuleB
@@ -97,6 +98,10 @@ class TheCell:
 
     def log(self, message: str):
         self.logs[datetime.now().isoformat()] = f"THECELL: {message}"
+
+    def print_logs(self):
+        for timestamp, message in self.logs.items():
+            print(f"{timestamp}: {message}")
 
     def _populate_markers(self, model_handler):
         images_dir = self.path / "images"
@@ -262,9 +267,11 @@ class TheCell:
         for marker_name in [self.granuleA, self.granuleB]:
             data_collector["granule_features"][marker_name][
                 "NuclearDistanceFeatures"
-            ] = features.nuclear_distance_features(
-                self.markers[marker_name].segmentation,
-                self.markers["nucleus"].segmentation,
+            ] = list(
+                features.nuclear_distance_features(
+                    self.markers[marker_name].segmentation,
+                    self.markers["nucleus"].segmentation,
+                )
             )
 
         # Get dnd1 and gra co-localization features
@@ -284,7 +291,7 @@ class TheCell:
                 self.markers[self.granuleA].segmentation > 0,
                 mask=self.markers["cell"].segmentation > 0,
             ),
-            "Pearson": features.pearson(
+            "Pearsons": features.pearsons(
                 self.markers[self.granuleA].raw_image,
                 self.markers[self.granuleB].raw_image,
                 mask=self.markers["cell"].segmentation > 0,
@@ -297,3 +304,43 @@ class TheCell:
         data_collector["granule_features"]["colocalization"] = coloc_features
 
         self.features = data_collector
+
+    def get_granule_features(self):
+        # Check if features is an empty dict
+        if not self.features:
+            raise ValueError(
+                "Features have not been computed yet. Please run compute_features() first."
+            )
+
+        big_data = []
+        for marker_name in [self.granuleA, self.granuleB]:
+            marker_features = self.features["granule_features"][marker_name]
+            unique_granule_indices = np.unique(self.markers[marker_name].segmentation)
+            marker_feature_dict = {
+                "uid": self.uid,
+                "condition": self.condition,
+                "stage": self.stage,
+                "marker": marker_name,
+            }
+
+            for granule_idx in unique_granule_indices:
+                if granule_idx == 0:
+                    continue
+                granule_feature_dict = marker_feature_dict.copy()
+                for feature_category_name, feature_list in marker_features.items():
+                    if isinstance(feature_list, str):
+                        continue
+                    for granule_data_dict in feature_list:
+                        if granule_data_dict["GranuleIndex"] == granule_idx:
+                            granule_feature_dict["GranuleIndex"] = granule_idx
+                            granule_feature_dict["FeatureCategory"] = (
+                                feature_category_name
+                            )
+                            for (
+                                feature_name,
+                                feature_value,
+                            ) in granule_data_dict.items():
+                                if feature_name != "GranuleIndex":
+                                    granule_feature_dict[feature_name] = feature_value
+                big_data.append(granule_feature_dict)
+        return big_data
