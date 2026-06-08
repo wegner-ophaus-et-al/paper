@@ -8,7 +8,7 @@
 
 // ---------- configuration ----------
 //#@ File (label="Data directory", style="directory") dataDir
-dataDir = "/Volumes/icb_remote/Documents/JW/py/projects/20260512_endoPGCs/data"
+dataDir = "/Volumes/icb_remote/Documents/JW/py/data/endogenous_PGCs_size_characterization/24hpf"
 
 // -----------------------------------
 
@@ -20,7 +20,7 @@ folders  = getFileList(dataPath);
 for (f = 0; f < folders.length; f++) {
 
     folderName = folders[f];
-
+//	print(folderName);
     // skip anything that is not a directory
     if (!File.isDirectory(dataPath + folderName)) continue;
 
@@ -73,7 +73,8 @@ function correctOrDrawMask(nlsPath, maskPath, folderName, label, colour) {
     // ---- open reference image ----
     open(nlsPath);
     nlsID = getImageID();
-    rename("nls [" + label + "] – " + folderName);
+    displayName = substring(folderName, 0	, 8);
+    rename("nls [" + label + "] – " + displayName);
     run("Enhance Contrast", "saturated=0.35");
     getDimensions(w, h, ch, sl, fr);
 
@@ -104,7 +105,7 @@ function correctOrDrawMask(nlsPath, maskPath, folderName, label, colour) {
     selectImage(nlsID);
     if (hasExistingSelection) {
         roiManager("Select", 0);
-        Overlay.addSelection(colour, 2);   // add as coloured overlay
+//        Overlay.addSelection(colour, 2);   // add as coloured overlay
         roiManager("Select", 0);           // keep active so user can edit
     }
 

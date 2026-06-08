@@ -10,6 +10,8 @@ import numpy as np
 import re
 from datetime import datetime
 from pathlib import Path
+import scipy.ndimage as ndi
+from skimage import measure
 
 
 class TheCell:
@@ -155,7 +157,7 @@ class TheCell:
         for marker_name, marker in self.markers.items():
             segmentation_path = mask_dir / f"{marker_name}.tif"
             if segmentation_path.exists():
-                marker.segmentation = tiff.imread(segmentation_path)
+                marker.segmentation = measure.label(tiff.imread(segmentation_path))
 
     def plot_markers_on_axis(
         self,
@@ -163,7 +165,7 @@ class TheCell:
         blind=True,
         granule_percentile=99,
         segmentation_cmap="nipy_spectral",
-        granule_alpha=0.8,
+        granule_alpha=0.4,
     ):
 
         if ax.shape != (3,):
@@ -202,12 +204,20 @@ class TheCell:
             alpha=(self.markers[self.granuleA].segmentation > 0).astype(float)
             * granule_alpha,
         )
+        ax[1].contour(
+            self.markers[self.granuleA].segmentation.astype(bool),
+            linewidths=0.5,
+        )
 
         ax[2].imshow(
             self.markers[self.granuleB].segmentation,
             cmap=segmentation_cmap,
             alpha=(self.markers[self.granuleB].segmentation > 0).astype(float)
             * granule_alpha,
+        )
+        ax[2].contour(
+            self.markers[self.granuleB].segmentation.astype(bool),
+            linewidths=0.5,
         )
 
         ax[0].text(
@@ -221,12 +231,32 @@ class TheCell:
         )
 
     def clean_segmentations(self):
+        # Fill holes in cell segmentation
+        self.markers["cell"].segmentation = ndi.binary_fill_holes(
+            self.markers["cell"].segmentation > 0
+        )
 
         # Delete segmentations outside of the cell segmentation
         for marker_name in [self.granuleA, self.granuleB, "nucleus"]:
             self.markers[marker_name].segmentation[
                 self.markers["cell"].segmentation == 0
             ] = 0
+
+        self.markers["cell"].segmentation = measure.label(
+            self.markers["cell"].segmentation
+        )
+
+        # Fill holes in nucleus segmentation
+        self.markers["nucleus"].segmentation = ndi.binary_fill_holes(
+            self.markers["nucleus"].segmentation > 0
+        )
+        self.markers["nucleus"].segmentation = measure.label(
+            self.markers["nucleus"].segmentation
+        )
+
+        self.log(
+            "Cleaned segmentations by filling holes and removing segmentations outside of the cell"
+        )
 
     def compute_features(self):
         data_collector = {
@@ -304,6 +334,16 @@ class TheCell:
         data_collector["granule_features"]["colocalization"] = coloc_features
 
         self.features = data_collector
+
+    def cell_segmentation_exists(self, min_cell_area=100):
+        """
+        Returns False if the cell segmentation is empty or below a certain area threshold, True otherwise
+        """
+        area_cell_segmentation = np.sum(self.markers["cell"].segmentation > 0)
+        if area_cell_segmentation < 100:  # Threshold for minimum cell area
+            return False
+        else:
+            return True
 
     def get_granule_features(self):
         # Check if features is an empty dict
