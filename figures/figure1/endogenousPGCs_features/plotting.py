@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import matplotlib as mpl
+import matplotlib.lines as mlines
 import seaborn as sns
 from pathlib import Path
 from scipy.stats import gaussian_kde
 import numpy as np
+from utils import statistical_analysis, get_stars
 
 mpl.rcParams["font.family"] = "Arial"
 
@@ -121,7 +123,7 @@ def per_cell_summary(
     features_std = ["Area", "SphericalVolume", "GranuleNumberPerCell"]
 
     ncols = 6
-    nrows = 4
+    nrows = 6
     subfig_cw = 1.2
     subfig_ch = 2
 
@@ -147,6 +149,10 @@ def per_cell_summary(
         [fig.add_subplot(gs[3, 0]), fig.add_subplot(gs[3, 3])],
         [fig.add_subplot(gs[3, 1]), fig.add_subplot(gs[3, 4])],
         [fig.add_subplot(gs[3, 2]), fig.add_subplot(gs[3, 5])],
+    ]
+    axs_kde = [
+        [fig.add_subplot(gs[4, :3]), fig.add_subplot(gs[4, 3:6])],
+        [fig.add_subplot(gs[5, :3]), fig.add_subplot(gs[5, 3:6])],
     ]
 
     log_scale_features = [
@@ -183,7 +189,7 @@ def per_cell_summary(
                 linewidth=0.8,
                 legend=False,
             )
-            ax[ax_idx].set_title(f"Title", fontsize=8, fontweight="bold")
+            ax[ax_idx].set_title(f"Mean", fontsize=8, fontweight="bold")
 
     for feature, ax in zip(features_sum, axs_sum):
         for ax_idx, marker in enumerate(["gra", "dnd1"]):
@@ -204,7 +210,7 @@ def per_cell_summary(
                 linewidth=0.8,
                 legend=False,
             )
-            ax[ax_idx].set_title(f"Title", fontsize=8, fontweight="bold")
+            ax[ax_idx].set_title(f"Sum", fontsize=8, fontweight="bold")
 
     for feature, ax in zip(features_std, axs_std):
         for ax_idx, marker in enumerate(["gra", "dnd1"]):
@@ -225,8 +231,65 @@ def per_cell_summary(
                 linewidth=0.8,
                 legend=False,
             )
-            ax[ax_idx].set_title(f"Title", fontsize=8, fontweight="bold")
+            ax[ax_idx].set_title(f"Std", fontsize=8, fontweight="bold")
 
+    def _forward(x):
+        return np.where(
+            x < 0,
+            (x + 1) * nuclear_fraction,
+            nuclear_fraction + x * (1 - nuclear_fraction),
+        )
+
+    def _inverse(x):
+        return np.where(
+            x < nuclear_fraction,
+            x / nuclear_fraction - 1,
+            (x - nuclear_fraction) / (1 - nuclear_fraction),
+        )
+
+    for ax, dev_stage in zip(axs_kde, ["8hpf", "24hpf"]):
+        for ax_idx, marker in enumerate(["gra", "dnd1"]):
+            data_kde = df_agg[
+                (df_agg["marker"] == marker) & (df_agg["stage"] == dev_stage)
+            ]
+            nuclear_fraction = float(data_kde["FranctionAlongRayToCellBoundary"].mean())
+
+            print(
+                f"Marker: {marker}, Stage: {dev_stage}, Nuclear Fraction: {nuclear_fraction:.2f}"
+            )
+
+            sns.kdeplot(
+                data=data_kde,
+                x="RelativeNuclearDistance",
+                hue="condition",
+                palette=color_palette,
+                fill=True,
+                ax=ax[ax_idx],
+            )
+            ax[ax_idx].set_xscale("function", functions=(_forward, _inverse))
+            ax[ax_idx].set_xlim(-1, 1)
+            tick_positions = [-1, 0, 1]
+            tick_labels = ["Nucleus centroid", "Nucleus boundary", "Cell boundary"]
+            ax[ax_idx].set_xticks(tick_positions, labels=tick_labels)
+            aspect_ratio = 0.075
+            ax[ax_idx].set_aspect(aspect_ratio)
+            ax[ax_idx].set_title(
+                f"Relative Nuclear Distance of {marker.capitalize()} at {dev_stage}",
+                fontsize=8,
+                fontweight="bold",
+            )
+
+    # Add a vertical dashed line between the two subplots
+    mid_x = 0.5  # Horizontal midpoint of the figure (between the two subplots)
+    line = mlines.Line2D(
+        [mid_x, mid_x],
+        [0.1, 0.9],  # x coords, y coords in figure space
+        transform=fig.transFigure,
+        color="gray",
+        linestyle="--",
+        linewidth=1,
+    )
+    fig.add_artist(line)
     plt.tight_layout()
     sns.despine()
     figure_dir = save_dir / "figures"
@@ -241,35 +304,161 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
     """
     Plot the differences between conditions for each marker and stage
     """
-    # Aggregate per marker, condition and cell by mean
-    df_agg = (
-        df.groupby(["marker", "condition", "stage"])
-        .agg("mean", numeric_only=True)
-        .reset_index()
-    )
-
-    stage_dfs = {
-        "8hpf": df_agg[df_agg["stage"] == "8hpf"],
-        "24hpf": df_agg[df_agg["stage"] == "24hpf"],
+    excluded_columns = {
+        "uid",
+        "condition",
+        "stage",
+        "marker",
+        "GranuleIndex",
+        "FeatureCategory",
     }
+    feature_columns = [
+        column
+        for column in df.select_dtypes(include=[np.number]).columns
+        if column not in excluded_columns and df[column].notna().any()
+    ]
 
-    # Get fold change between conditions for each marker per stage
-    for stage, stage_df in stage_dfs.items():
-        fig, ax = plt.subplots(figsize=(6, 4))
-        for marker in stage_df["marker"].unique():
-            marker_df = stage_df[stage_df["marker"] == marker]
-            fold_change = (
-                marker_df[marker_df["condition"] == "kd"]["Area"].values[0]
-                / marker_df[marker_df["condition"] == "ctrl"]["Area"].values[0]
+    if isinstance(color_palette, dict):
+        palette = list(color_palette.values())
+    else:
+        palette = sns.color_palette(color_palette, n_colors=2)
+
+    figure_dir = save_dir / "figures"
+    figure_dir.mkdir(exist_ok=True)
+
+    stage_order = [
+        stage for stage in ["8hpf", "24hpf"] if stage in df["stage"].unique()
+    ]
+    if not stage_order:
+        stage_order = list(df["stage"].dropna().unique())
+
+    marker_order = [
+        marker for marker in ["gra", "dnd1"] if marker in df["marker"].unique()
+    ]
+    if not marker_order:
+        marker_order = list(df["marker"].dropna().unique())
+
+    conditions = [
+        condition
+        for condition in ["ctrl", "kd"]
+        if condition in df["condition"].unique()
+    ]
+
+    for stage in stage_order:
+        for marker in marker_order:
+            subset = df[(df["stage"] == stage) & (df["marker"] == marker)]
+            if subset.empty:
+                continue
+
+            x_positions = np.arange(len(feature_columns))
+            fold_changes = []
+            p_values = []
+            summary_lines = [f"{marker} at {stage}:"]
+
+            def _clean_feature_values(series):
+                values = series.dropna().to_numpy()
+                if np.iscomplexobj(values):
+                    values = np.real(values)
+                values = np.asarray(values, dtype=float)
+                return values[np.isfinite(values)]
+
+            for feature in feature_columns:
+                ctrl_values = _clean_feature_values(
+                    subset.loc[subset["condition"] == "ctrl", feature]
+                )
+                kd_values = _clean_feature_values(
+                    subset.loc[subset["condition"] == "kd", feature]
+                )
+
+                if len(ctrl_values) == 0 or len(kd_values) == 0:
+                    fold_changes.append(np.nan)
+                else:
+                    ctrl_mean = float(np.mean(ctrl_values))
+                    kd_mean = float(np.mean(kd_values))
+                    fold_changes.append(
+                        abs(float(kd_mean / ctrl_mean)) if ctrl_mean != 0 else np.nan
+                    )
+
+                if len(conditions) == 2:
+                    if len(ctrl_values) < 2 or len(kd_values) < 2:
+                        p_values.append(np.nan)
+                    else:
+                        _, _, p_value = statistical_analysis(
+                            ctrl_values.tolist(), kd_values.tolist()
+                        )
+                        p_values.append(float(p_value))
+                else:
+                    p_values.append(np.nan)
+
+                ratio_text = (
+                    "nan" if np.isnan(fold_changes[-1]) else f"{fold_changes[-1]:.6g}"
+                )
+                p_value_text = (
+                    "nan" if np.isnan(p_values[-1]) else f"{p_values[-1]:.6g}"
+                )
+                summary_lines.append(
+                    f"   {feature}:   {ratio_text}\t {p_value_text}\t {get_stars(p_values[-1])}"
+                )
+
+            fig, (ax_mean, ax_pvalue) = plt.subplots(
+                2,
+                1,
+                figsize=(max(12, len(feature_columns) * 0.5), 8),
+                sharex=True,
             )
-            ax.bar(marker, fold_change, color=color_palette[0], alpha=0.7)
 
-        ax.set_title(f"Fold Change (KD / CTRL) for {stage}", fontsize=10)
-        ax.set_ylabel("Fold Change (Area)", fontsize=8)
-        sns.despine()
-        figure_dir = save_dir / "figures"
-        figure_dir.mkdir(exist_ok=True)
-        fig.savefig(figure_dir / f"fold_change_{stage}.pdf")
+            ax_mean.bar(
+                x_positions,
+                fold_changes,
+                color=palette[0],
+                edgecolor="black",
+                alpha=0.8,
+            )
+            ax_mean.set_ylabel("kd / ctrl")
+            ax_mean.set_title(f"{stage} / {marker} - feature fold change")
+            ax_mean.tick_params(axis="x", labelbottom=False)
+            ax_mean.set_ylim(0, 10)
+
+            ax_pvalue.bar(
+                x_positions,
+                p_values,
+                color=palette[1] if len(palette) > 1 else palette[0],
+                alpha=0.8,
+                edgecolor="black",
+            )
+            ax_pvalue.axhline(0.05, color="black", linestyle="--", linewidth=1)
+            ax_pvalue.set_ylabel("p-value")
+            ax_pvalue.set_xlabel("Features")
+            ax_pvalue.set_ylim(10e-10, 1)
+            ax_pvalue.set_xticks(x_positions)
+            ax_pvalue.set_xticklabels(feature_columns, rotation=45, ha="right")
+            ax_pvalue.set_title(f"{stage} / {marker} - ctrl vs kd p-values")
+            ax_pvalue.set_yscale("log")
+
+            for x_pos, p_value in zip(x_positions, p_values):
+                if np.isnan(p_value):
+                    label_y = 1e-9
+                else:
+                    label_y = max(p_value * 1.4, 1e-9)
+                ax_pvalue.text(
+                    x_pos,
+                    label_y,
+                    get_stars(p_value),
+                    ha="center",
+                    va="bottom",
+                    fontsize=8,
+                    fontweight="bold",
+                )
+
+            fig.tight_layout()
+            sns.despine(fig=fig)
+            fig.savefig(
+                figure_dir / f"fold_change_{stage}_{marker}.pdf", bbox_inches="tight"
+            )
+            plt.close(fig)
+
+            summary_path = figure_dir / f"fold_change_{stage}_{marker}.txt"
+            summary_path.write_text("\n".join(summary_lines) + "\n")
 
 
 def plot_ridgeplot(df, marker: str, ax, feature: str = "featureX"):

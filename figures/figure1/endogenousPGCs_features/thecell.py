@@ -301,6 +301,7 @@ class TheCell:
                 features.nuclear_distance_features(
                     self.markers[marker_name].segmentation,
                     self.markers["nucleus"].segmentation,
+                    self.markers["cell"].segmentation,
                 )
             )
 
@@ -333,6 +334,25 @@ class TheCell:
         }
         data_collector["granule_features"]["colocalization"] = coloc_features
 
+        granule_to_cytoplasm = {
+            f"{self.granuleA}_to_cytoplasm": features.granule_to_cytoplasm_intensity_ratio(
+                self.markers[self.granuleA].raw_image,
+                self.markers[self.granuleA].segmentation,
+                self.markers["nucleus"].segmentation,
+                self.markers["cell"].segmentation,
+            ),
+            f"{self.granuleB}_to_cytoplasm": features.granule_to_cytoplasm_intensity_ratio(
+                self.markers[self.granuleB].raw_image,
+                self.markers[self.granuleB].segmentation,
+                self.markers["nucleus"].segmentation,
+                self.markers["cell"].segmentation,
+            ),
+        }
+
+        data_collector["granule_features"]["granule_to_cytoplasm"] = (
+            granule_to_cytoplasm
+        )
+
         self.features = data_collector
 
     def cell_segmentation_exists(self, min_cell_area=100):
@@ -340,7 +360,7 @@ class TheCell:
         Returns False if the cell segmentation is empty or below a certain area threshold, True otherwise
         """
         area_cell_segmentation = np.sum(self.markers["cell"].segmentation > 0)
-        if area_cell_segmentation < 100:  # Threshold for minimum cell area
+        if area_cell_segmentation < min_cell_area:  # Threshold for minimum cell area
             return False
         else:
             return True

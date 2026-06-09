@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from utils import print_nested
+from multiprocessing import Pool
 from plotting import (
+    plot_foldchange,
     plot_individial_granule_profile,
     contact_sheet,
     per_cell_summary,
@@ -16,9 +18,10 @@ data_root = Path(
     "/Users/icb_remote/Documents/JW/py/data/endogenous_PGCs_size_characterization"
 )
 
-redo_feature_extraction = False
+only_data_processing = False
+redo_feature_extraction = True
 
-if redo_feature_extraction:
+if not only_data_processing:
     cell_objects = []
     for data_dir in [data_root / "8hpf", data_root / "24hpf"]:
         for cell_dir in data_dir.iterdir():
@@ -32,22 +35,29 @@ if redo_feature_extraction:
     for cell_counter, cell in enumerate(cell_objects):
         if not cell.cell_segmentation_exists():
             continue
-        print(f"Cell {cell_counter + 1}/{len(cell_objects)}")
-        cell.read_segmentations()
-        cell.clean_segmentations()
-        cell.compute_features()
+        if redo_feature_extraction:
+            print(f"Cell {cell_counter + 1}/{len(cell_objects)}")
+            cell.read_segmentations()
+            cell.clean_segmentations()
+            cell.compute_features()
 
-        with open(cell.path / "thecell.pkl", "wb") as f:
-            pickle.dump(cell, f)
+            with open(cell.path / "thecell.pkl", "wb") as f:
+                pickle.dump(cell, f)
 
         data.extend(cell.get_granule_features())
 
     df = pd.DataFrame(data)
     df.to_pickle(data_root / "granule_features.pkl")
     df.to_csv(data_root / "granule_features.csv")
-    contact_sheet(cell_objects, data_root)
+    if redo_feature_extraction:
+        contact_sheet(cell_objects, data_root)
+
+    print("---" * 20)
+    print_nested(cell_objects[0].features, indent=2)
+    print("---" * 20)
 else:
     df = pd.read_pickle(data_root / "granule_features.pkl")
+
 
 # Calc aspect ratio
 df["AspectRatio"] = df["MajorAxisLength"] / df["MinorAxisLength"]
@@ -87,8 +97,8 @@ color_palette = {
     "kd": "#8a38a6",
 }
 
-
 plot_individial_granule_profile(df, data_root)
 
 per_cell_summary(df, data_root, color_palette=color_palette)
+plot_foldchange(df, data_root)
 ridgeplot_per_marker(df, data_root)
