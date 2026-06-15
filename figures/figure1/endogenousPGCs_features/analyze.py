@@ -11,6 +11,7 @@ from plotting import (
     contact_sheet,
     per_cell_summary,
     ridgeplot_per_marker,
+    cell_features,
 )
 
 
@@ -18,87 +19,108 @@ data_root = Path(
     "/Users/icb_remote/Documents/JW/py/data/endogenous_PGCs_size_characterization"
 )
 
-only_data_processing = False
-redo_feature_extraction = True
+only_data_processing = True
+redo_feature_extraction = False
 
-if not only_data_processing:
-    cell_objects = []
-    for data_dir in [data_root / "8hpf", data_root / "24hpf"]:
-        for cell_dir in data_dir.iterdir():
-            if not cell_dir.is_dir() or "figures" in cell_dir.name:
-                continue
-            with open(cell_dir / "thecell.pkl", "rb") as f:
-                cell = pickle.load(f)
-                cell_objects.append(cell)
 
-    data = []
-    for cell_counter, cell in enumerate(cell_objects):
-        if not cell.cell_segmentation_exists():
-            continue
-        if redo_feature_extraction:
-            print(f"Cell {cell_counter + 1}/{len(cell_objects)}")
-            cell.read_segmentations()
-            cell.clean_segmentations()
-            cell.compute_features()
-
-            with open(cell.path / "thecell.pkl", "wb") as f:
-                pickle.dump(cell, f)
-
-        data.extend(cell.get_granule_features())
-
-    df = pd.DataFrame(data)
-    df.to_pickle(data_root / "granule_features.pkl")
-    df.to_csv(data_root / "granule_features.csv")
+def process_cell(args):
+    cell_counter, cell, total = args
+    if not cell.cell_segmentation_exists():
+        return [[], {}]
     if redo_feature_extraction:
-        contact_sheet(cell_objects, data_root)
+        print(f"Cell {cell_counter + 1}/{total}")
+        cell.read_segmentations()
+        cell.clean_segmentations()
+        cell.compute_features()
 
-    print("---" * 20)
-    print_nested(cell_objects[0].features, indent=2)
-    print("---" * 20)
-else:
-    df = pd.read_pickle(data_root / "granule_features.pkl")
+        with open(cell.path / "thecell.pkl", "wb") as f:
+            pickle.dump(cell, f)
+
+    return (cell.get_granule_features(), cell.get_cell_features())
 
 
-# Calc aspect ratio
-df["AspectRatio"] = df["MajorAxisLength"] / df["MinorAxisLength"]
+def main():
+    if not only_data_processing:
+        cell_objects = []
+        for data_dir in [data_root / "8hpf", data_root / "24hpf"]:
+            for cell_dir in data_dir.iterdir():
+                if not cell_dir.is_dir() or "figures" in cell_dir.name:
+                    continue
+                with open(cell_dir / "thecell.pkl", "rb") as f:
+                    cell = pickle.load(f)
+                    cell_objects.append(cell)
 
-# Acquisition parameters
-magnification = 63
-pixel_pitch = 6.5
-binning = 1
-pixel_size = pixel_pitch * binning / magnification  # in microns
+        data = []
+        data_cell = []
+        with Pool() as pool:
+            for features in pool.map(
+                process_cell,
+                [
+                    (cell_counter, cell, len(cell_objects))
+                    for cell_counter, cell in enumerate(cell_objects)
+                ],
+            ):
+                data.extend(features[0])
+                data_cell.append(features[1])
 
-for col in df.columns:
-    if "fourier" in col.lower():
-        continue
+        df = pd.DataFrame(data)
+        df.to_pickle(data_root / "granule_features.pkl")
+        # df.to_csv(data_root / "granule_features.csv")
 
-# Scale features to um
-for lin_feature in [
-    "Perimeter",
-    "MajorAxisLength",
-    "MinorAxisLength",
-    "EdgeDistanceToNucleus",
-    "EdgeDistanceToNucleusSigned",
-    "CentroidDistanceToNucleus",
-    "CentroidDistanceToNucleusSigned",
-]:
-    df[lin_feature] = df[lin_feature] * pixel_size
-df["Area"] = df["Area"] * pixel_size**2
-df["TouchAreaNucleus"] = df["TouchAreaNucleus"] * pixel_size**2
-for vol_feature in [
-    "SphericalVolume",
-    "EllipsoidVolumeProlate",
-    "EllipsoidVolumeOblate",
-]:
-    df[vol_feature] = df[vol_feature] * pixel_size**3
+        print(data_cell)
+        df_cell = pd.DataFrame(data_cell)
+        df_cell.to_pickle(data_root / "cell_features.pkl")
 
-color_palette = {
-    "ctrl": "#878787",
-    "kd": "#8a38a6",
-}
+        if redo_feature_extraction:
+            contact_sheet(cell_objects, data_root)
 
-plot_individial_granule_profile(df, data_root)
+        print("---" * 20)
+        print_nested(cell_objects[0].features, indent=2)
+        print("---" * 20)
+    else:
+        df = pd.read_pickle(data_root / "granule_features.pkl")
+        df_cell = pd.read_pickle(data_root / "cell_features.pkl")
 
-per_cell_summary(df, data_root, color_palette=color_palette)
-plot_foldchange(df, data_root)
-ridgeplot_per_marker(df, data_root)
+    # Calc aspect ratio
+    df["AspectRatio"] = df["MajorAxisLength"] / df["MinorAxisLength"]
+
+    # Acquisition parameters
+    magnification = 63
+    pixel_pitch = 6.5
+    binning = 1
+    pixel_size = pixel_pitch * binning / magnification  # in microns
+
+    # Scale features to um
+    for lin_feature in [
+        "Perimeter",
+        "MajorAxisLength",
+        "MinorAxisLength",
+        "EdgeDistanceToNucleus",
+        "EdgeDistanceToNucleusSigned",
+        "CentroidDistanceToNucleus",
+        "CentroidDistanceToNucleusSigned",
+    ]:
+        df[lin_feature] = df[lin_feature] * pixel_size
+    df["Area"] = df["Area"] * pixel_size**2
+    df["TouchAreaNucleus"] = df["TouchAreaNucleus"] * pixel_size**2
+    for vol_feature in [
+        "SphericalVolume",
+        "EllipsoidVolumeProlate",
+        "EllipsoidVolumeOblate",
+    ]:
+        df[vol_feature] = df[vol_feature] * pixel_size**3
+
+    color_palette = {
+        "ctrl": "#878787",
+        "kd": "#8a38a6",
+    }
+
+    plot_individial_granule_profile(df, data_root)
+
+    per_cell_summary(df, data_root, color_palette=color_palette)
+    plot_foldchange(df, data_root)
+    cell_features(df_cell, data_root)
+
+
+if __name__ == "__main__":
+    main()

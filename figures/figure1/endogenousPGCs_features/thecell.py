@@ -404,3 +404,28 @@ class TheCell:
                                     granule_feature_dict[feature_name] = feature_value
                 big_data.append(granule_feature_dict)
         return big_data
+
+    def get_cell_features(self):
+
+        data = {
+            "uid": self.uid,
+            "condition": self.condition,
+            "stage": self.stage,
+            "markers": f"{self.granuleA}, {self.granuleB}",
+        }
+
+        coloc = self.features["granule_features"]["colocalization"].copy()
+        # Remove MandersPercentile from coloc dict
+        coloc.pop("MandersPercentile", None)
+        data.update(coloc)
+
+        data.update(self.features["granule_features"]["granule_to_cytoplasm"])
+
+        for key in ["cell", "nucleus"]:
+            data.update(
+                {
+                    f"{key.capitalize()}{feature_name}": feature_value
+                    for feature_name, feature_value in self.features[key].items()
+                }
+            )
+        return data
