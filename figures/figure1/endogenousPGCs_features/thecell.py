@@ -109,14 +109,14 @@ class TheCell:
         images_dir = self.path / "images"
         return {
             self.granuleA: Marker(
-                image_path=images_dir / "dnd1.tif",
+                image_path=images_dir / f"{self.granuleA}.tif",
                 parent_name=self.name,
                 parent_id=self.uid,
                 model_handler=model_handler,
                 compartment="granules",
             ),
             self.granuleB: Marker(
-                image_path=images_dir / "granulito.tif",
+                image_path=images_dir / f"{self.granuleB}.tif",
                 parent_name=self.name,
                 parent_id=self.uid,
                 model_handler=model_handler,
@@ -143,6 +143,7 @@ class TheCell:
         Write segmenatations from TheCell to disk. Funtion mean to be used befor screening and refining segmentations
         """
         mask_dir = self.path / "masks"
+        mask_dir.mkdir(exist_ok=True)
 
         for marker_name, marker in self.markers.items():
             output_path = mask_dir / f"{marker_name}.tif"
@@ -157,6 +158,7 @@ class TheCell:
         for marker_name, marker in self.markers.items():
             segmentation_path = mask_dir / f"{marker_name}.tif"
             if segmentation_path.exists():
+                # print("Got segmentation")
                 marker.segmentation = measure.label(tiff.imread(segmentation_path))
 
     def plot_markers_on_axis(
@@ -230,7 +232,7 @@ class TheCell:
             transform=ax[0].transAxes,
         )
 
-    def clean_segmentations(self):
+    def clean_segmentations(self, max_granule_size=650):
         # Fill holes in cell segmentation
         self.markers["cell"].segmentation = ndi.binary_fill_holes(
             self.markers["cell"].segmentation > 0
@@ -253,6 +255,14 @@ class TheCell:
         self.markers["nucleus"].segmentation = measure.label(
             self.markers["nucleus"].segmentation
         )
+
+        for granule_marker in [self.granuleA, self.granuleB]:
+            regions = measure.regionprops(self.markers[granule_marker].segmentation)
+            for region in regions:
+                if region.area > max_granule_size:
+                    self.markers[granule_marker].segmentation[
+                        self.markers[granule_marker].segmentation == region.label
+                    ] = 0
 
         self.log(
             "Cleaned segmentations by filling holes and removing segmentations outside of the cell"
