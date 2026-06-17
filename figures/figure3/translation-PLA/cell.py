@@ -60,9 +60,10 @@ class Cell:
         # footprint = disk(20)
         # normal_result = rank.mean(cell_img, footprint=footprint)
         # cell_img = cell_img - normal_result
-        cell_img = gaussian(cell_img, sigma=1.5)
-        cell_mask = cell_img > np.percentile(cell_img, 20)
+        cell_img = gaussian(cell_img, sigma=3)
+        cell_mask = cell_img > np.percentile(cell_img, 45)
         cell_mask = ndi.binary_opening(cell_mask)
+        cell_mask = ndi.binary_fill_holes(cell_mask)
         self.segmentations["cell"] = cell_mask.astype(np.uint8)
 
     def plot_images(self, ax):
