@@ -117,3 +117,48 @@ def get_stars(p_value):
         return "*"
     else:
         return "ns"
+
+
+def statistics(df_pivot, rna_type, ratio_desc):
+    """
+    Perform statistical analysis on pivoted ratio data.
+
+    Args:
+        df_pivot: Pivoted dataframe with ratio column
+        rna_type: RNA type being analyzed (e.g., 'vasa' or 'actin')
+        ratio_desc: Description of ratio (e.g., 'granule / granule_periphery')
+
+    Returns:
+        List of formatted strings with statistical results
+    """
+    df_pivot = df_pivot.copy()  # Avoid modifying the original dataframe
+    df_pivot.reset_index(inplace=True)  # Ensure 'condition' is a column for filtering
+    results = []
+    results.append(f"{rna_type} mRNA probe:")
+    results.append(f"    Ratio: {ratio_desc}")
+
+    for drug in ["CHX", "PatA"]:
+        ctrl_vals = df_pivot[df_pivot["condition"] == "DMSO"]["ratio"].to_list()
+        drug_vals = df_pivot[df_pivot["condition"] == drug]["ratio"].to_list()
+
+        if len(ctrl_vals) == 0 or len(drug_vals) == 0:
+            continue
+
+        ctrl_mean = np.mean(ctrl_vals)
+        drug_mean = np.mean(drug_vals)
+        ctrl_count = len(ctrl_vals)
+        drug_count = len(drug_vals)
+
+        test_name, _, p_value = statistical_analysis(ctrl_vals, drug_vals)
+        stars = get_stars(p_value)
+
+        results.append(f"    DMSO-{drug}:")
+        results.append(f"        DMSO mean:    {ctrl_mean:.5f}")
+        results.append(f"        {drug} mean:    {drug_mean:.5f}")
+        results.append(f"        DMSO count:   {ctrl_count}")
+        results.append(f"        {drug} count:   {drug_count}")
+        results.append(f"        Test name:    {test_name}")
+        results.append(f"        p value:      {p_value:.7f}")
+        results.append(f"        stars:        {stars}")
+
+    return results

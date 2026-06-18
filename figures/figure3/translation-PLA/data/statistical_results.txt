@@ -1,0 +1,1314 @@
+Results for granule-sum:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    2.91581
+        CHX mean:    3.31354
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.2295632
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    2.91581
+        PatA mean:    2.10209
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0401003
+        stars:        *
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    2.75268
+        CHX mean:    2.92632
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.2879424
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    2.75268
+        PatA mean:    2.39721
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.4924915
+        stars:        ns
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    3.32045
+        CHX mean:    3.18190
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.7113096
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    3.32045
+        PatA mean:    1.97078
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0910118
+        stars:        ns
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    2.00503
+        CHX mean:    2.60912
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.1747731
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    2.00503
+        PatA mean:    1.72745
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.6598850
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    1.10980
+        CHX mean:    1.52712
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.2887139
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.10980
+        PatA mean:    1.09984
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.4949629
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    2.82664
+        CHX mean:    1.85437
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0745726
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    2.82664
+        PatA mean:    1.88071
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.1132921
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    2.05347
+        CHX mean:    2.13294
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.3397899
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    2.05347
+        PatA mean:    1.72104
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.5799147
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    1.38632
+        CHX mean:    2.04835
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0243622
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    1.38632
+        PatA mean:    1.43939
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.3640075
+        stars:        ns
+Results for granule-mean:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.34381
+        CHX mean:    0.35054
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.7511535
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.34381
+        PatA mean:    0.30953
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3127426
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.34007
+        CHX mean:    0.34472
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.7712880
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.34007
+        PatA mean:    0.30176
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0373480
+        stars:        *
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    4.24284
+        CHX mean:    4.14418
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.4742863
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    4.24284
+        PatA mean:    3.43174
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0249644
+        stars:        *
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.30566
+        CHX mean:    0.31532
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.6327197
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.30566
+        PatA mean:    0.28364
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.7189542
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.08324
+        CHX mean:    0.08808
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.5438342
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.08324
+        PatA mean:    0.09197
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.4949629
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    3.82803
+        CHX mean:    3.50516
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.2275346
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    3.82803
+        PatA mean:    3.43616
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.1354006
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.29963
+        CHX mean:    0.29934
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.9848635
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.29963
+        PatA mean:    0.26191
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0318741
+        stars:        *
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.09302
+        CHX mean:    0.10208
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.2713416
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.09302
+        PatA mean:    0.08931
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.6594127
+        stars:        ns
+Results for granule-median:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.31983
+        CHX mean:    0.32333
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.8779098
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.31983
+        PatA mean:    0.27709
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.1530296
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.30859
+        CHX mean:    0.31667
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.6497891
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.30859
+        PatA mean:    0.26854
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0450242
+        stars:        *
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    4.73658
+        CHX mean:    4.46134
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.2887139
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    4.73658
+        PatA mean:    3.50627
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0081576
+        stars:        **
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.28549
+        CHX mean:    0.29558
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.6384615
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.28549
+        PatA mean:    0.25614
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3979557
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.07052
+        CHX mean:    0.07811
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.3862649
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.07052
+        PatA mean:    0.08072
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.4451324
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    4.11719
+        CHX mean:    3.63183
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.1547752
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    4.11719
+        PatA mean:    3.54551
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.1568650
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.27453
+        CHX mean:    0.28313
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.6224482
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.27453
+        PatA mean:    0.23818
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0613013
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.08159
+        CHX mean:    0.09253
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.2219914
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.08159
+        PatA mean:    0.07773
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.6691981
+        stars:        ns
+Results for pla-sum:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    8.00982
+        CHX mean:    8.64452
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.5345093
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    8.00982
+        PatA mean:    6.60113
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.4451324
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    6.98061
+        CHX mean:    8.10446
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0586043
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    6.98061
+        PatA mean:    6.50395
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.8420567
+        stars:        ns
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.83335
+        CHX mean:    0.74220
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.5490938
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.83335
+        PatA mean:    0.60337
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3979557
+        stars:        ns
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    6.16427
+        CHX mean:    7.42854
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.2022064
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    6.16427
+        PatA mean:    5.95294
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      1.0000000
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    10.88113
+        CHX mean:    14.60974
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.1517267
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    10.88113
+        PatA mean:    11.27081
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.7189542
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.79768
+        CHX mean:    0.54314
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0320887
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    0.79768
+        PatA mean:    0.60895
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.1553507
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    5.91088
+        CHX mean:    6.96777
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0635779
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    5.91088
+        PatA mean:    5.40793
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.8420567
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    10.62981
+        CHX mean:    17.32292
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0041867
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    10.62981
+        PatA mean:    11.98192
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.2980624
+        stars:        ns
+Results for pla-mean:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.91866
+        CHX mean:    0.91021
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.7783413
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.91866
+        PatA mean:    0.94318
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.4949629
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.84986
+        CHX mean:    0.95283
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0124820
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    0.84986
+        PatA mean:    0.82222
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.3190963
+        stars:        ns
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.10625
+        CHX mean:    1.04934
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.0050618
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    1.10625
+        PatA mean:    1.05348
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0081576
+        stars:        **
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.91881
+        CHX mean:    0.90127
+        DMSO count:   16
+        CHX count:   11
+        Test name:    Mann-Whitney U test
+        p value:      0.6043627
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.91881
+        PatA mean:    0.94619
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3979557
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.83185
+        CHX mean:    0.86610
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.2048760
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.83185
+        PatA mean:    0.89580
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0910118
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.15841
+        CHX mean:    1.09880
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0870736
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.15841
+        PatA mean:    1.11552
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.2406195
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.86261
+        CHX mean:    0.97637
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0087668
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    0.86261
+        PatA mean:    0.82488
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.4026854
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.74445
+        CHX mean:    0.86796
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0063118
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    0.74445
+        PatA mean:    0.74302
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.8768350
+        stars:        ns
+Results for pla-median:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.90535
+        CHX mean:    0.90226
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.9267470
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.90535
+        PatA mean:    0.93871
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3539240
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.85128
+        CHX mean:    0.95642
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0066820
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    0.85128
+        PatA mean:    0.83687
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.7066933
+        stars:        ns
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.12227
+        CHX mean:    1.06177
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.0070684
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    1.12227
+        PatA mean:    1.06060
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0147427
+        stars:        *
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.90502
+        CHX mean:    0.90022
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.9008607
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.90502
+        PatA mean:    0.94127
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3539240
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.80899
+        CHX mean:    0.84889
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.2217860
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.80899
+        PatA mean:    0.88569
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0752863
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.17625
+        CHX mean:    1.10035
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0586043
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.17625
+        PatA mean:    1.15174
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.4650038
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.86260
+        CHX mean:    0.98169
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0038499
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    0.86260
+        PatA mean:    0.83998
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.5701514
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.74056
+        CHX mean:    0.87025
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0023357
+        stars:        **
+    DMSO-PatA:
+        DMSO mean:    0.74056
+        PatA mean:    0.73635
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.8075839
+        stars:        ns
+Results for rna_type-sum:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    7.84592
+        CHX mean:    8.40465
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.5929328
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    7.84592
+        PatA mean:    6.09626
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3127426
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    6.15511
+        CHX mean:    7.47713
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.1127035
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    6.15511
+        PatA mean:    4.53480
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0377932
+        stars:        *
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.94121
+        CHX mean:    0.84248
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.6050218
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.94121
+        PatA mean:    0.64398
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.2748047
+        stars:        ns
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    6.03204
+        CHX mean:    7.24890
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.2142772
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    6.03204
+        PatA mean:    5.45226
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.7797926
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    9.69436
+        CHX mean:    13.24377
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.1476803
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    9.69436
+        PatA mean:    9.78129
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.7797926
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.86889
+        CHX mean:    0.58206
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0319521
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    0.86889
+        PatA mean:    0.70829
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.2721595
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    5.32995
+        CHX mean:    6.56812
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.1012139
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    5.32995
+        PatA mean:    3.68172
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.0253401
+        stars:        *
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    9.15947
+        CHX mean:    15.20829
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0267362
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    9.15947
+        PatA mean:    7.12167
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.5799147
+        stars:        ns
+Results for rna_type-mean:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.89177
+        CHX mean:    0.88425
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.7146577
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.89177
+        PatA mean:    0.87470
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3979557
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.76764
+        CHX mean:    0.87631
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.1001408
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.76764
+        PatA mean:    0.58205
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0131917
+        stars:        *
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.22841
+        CHX mean:    1.15646
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.0616065
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.22841
+        PatA mean:    1.12468
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0249644
+        stars:        *
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.89004
+        CHX mean:    0.87768
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.5982743
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.89004
+        PatA mean:    0.87132
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.5476436
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.72960
+        CHX mean:    0.77063
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.1870661
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.72960
+        PatA mean:    0.77948
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0752863
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.25928
+        CHX mean:    1.19076
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.1643609
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.25928
+        PatA mean:    1.31444
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.3482994
+        stars:        ns
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.80494
+        CHX mean:    0.91765
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.1132164
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.80494
+        PatA mean:    0.57025
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0035409
+        stars:        **
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.62676
+        CHX mean:    0.74397
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0796684
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.62676
+        PatA mean:    0.45330
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0180027
+        stars:        *
+Results for rna_type-median:
+
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.86992
+        CHX mean:    0.87000
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.9971976
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.86992
+        PatA mean:    0.84529
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3539240
+        stars:        ns
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.75290
+        CHX mean:    0.87489
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0454846
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    0.75290
+        PatA mean:    0.60557
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0205096
+        stars:        *
+actin mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.26159
+        CHX mean:    1.17470
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.0340153
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    1.26159
+        PatA mean:    1.14871
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.0147427
+        stars:        *
+actin mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.86727
+        CHX mean:    0.86183
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.8374619
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.86727
+        PatA mean:    0.84095
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.3539240
+        stars:        ns
+actin mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.69266
+        CHX mean:    0.74807
+        DMSO count:   16
+        CHX count:   11
+        Test name:    t-test
+        p value:      0.0935036
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.69266
+        PatA mean:    0.73848
+        DMSO count:   16
+        PatA count:   5
+        Test name:    Mann-Whitney U test
+        p value:      0.2748047
+        stars:        ns
+vasa mRNA probe:
+    Ratio: granule / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    1.33174
+        CHX mean:    1.18910
+        DMSO count:   17
+        CHX count:   16
+        Test name:    Mann-Whitney U test
+        p value:      0.0939306
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    1.33174
+        PatA mean:    1.53761
+        DMSO count:   17
+        PatA count:   12
+        Test name:    Mann-Whitney U test
+        p value:      0.0253401
+        stars:        *
+vasa mRNA probe:
+    Ratio: cytoplasm / granule_periphery
+    DMSO-CHX:
+        DMSO mean:    0.79044
+        CHX mean:    0.92002
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0516317
+        stars:        ns
+    DMSO-PatA:
+        DMSO mean:    0.79044
+        PatA mean:    0.58833
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0037569
+        stars:        **
+vasa mRNA probe:
+    Ratio: nucleo_cytoplasm / granule
+    DMSO-CHX:
+        DMSO mean:    0.59750
+        CHX mean:    0.74379
+        DMSO count:   17
+        CHX count:   16
+        Test name:    t-test
+        p value:      0.0229552
+        stars:        *
+    DMSO-PatA:
+        DMSO mean:    0.59750
+        PatA mean:    0.41727
+        DMSO count:   17
+        PatA count:   12
+        Test name:    t-test
+        p value:      0.0089883
+        stars:        **
