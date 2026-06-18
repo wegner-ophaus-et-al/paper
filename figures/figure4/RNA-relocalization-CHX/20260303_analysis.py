@@ -321,7 +321,7 @@ for i, sample_directory in enumerate(list_sample_dirs):
             percentile_rna=99.4,
             distance_in=3,
             distance_out=5,
-            save_images=True,
+            save_images=False,
         )
     )
 
@@ -356,6 +356,9 @@ df_per_sample = (
 # Calculate Various Ratios for mean intensities
 df["MeanRNAInGranules_Cytoplasm_Ratio"] = (
     df["MeanRNAInGranules"] / df["MeanRNAInCytoplasm"]
+)
+df["MeanRNA_Cytoplasm_Granules_Ratio"] = (
+    df["MeanRNAInCytoplasm"] / df["MeanRNAInGranules"]
 )
 df["MeanRNAInGranuleCenters_Cytoplasm_Ratio"] = (
     df["MeanRNAInGranuleCenters"] / df["MeanRNAInCytoplasm"]
@@ -575,6 +578,7 @@ sns.swarmplot(
 )
 ax2[1, 2].set_title("Mean Granule Size")
 
+
 sns.violinplot(
     data=df_per_sample,
     x="Condition",
@@ -598,6 +602,90 @@ sns.despine(fig2)
 plt.tight_layout()
 
 fig2.savefig("output/quantifiaction.pdf")
+
+fig_paper, ax_paper = plt.subplots(1, 1, figsize=(3, 4))
+sns.violinplot(
+    data=df,
+    x="RNAType",
+    y="MeanRNA_Cytoplasm_Granules_Ratio",
+    hue="Condition",
+    ax=ax_paper,
+    inner="quart",
+    split=True,
+    # palette=color_palette,
+)
+sns.swarmplot(
+    data=df,
+    x="RNAType",
+    y="MeanRNA_Cytoplasm_Granules_Ratio",
+    hue="Condition",
+    ax=ax_paper,
+    color="k",
+    alpha=0.85,
+    dodge=True,
+    size=3,
+)
+ax_paper.set_title("Mean Intensity (whole) Granules/Cytoplasm Ratio")
+ax_paper.set_ylabel(r"$\frac{\overline{I}_{Cytoplasm}}{\overline{I}_{Granule}}$")
+plt.tight_layout()
+sns.despine(fig_paper)
+fig_paper.savefig("output/quantification_paper.pdf")
+
+plt.rcParams.update(
+    {
+        "font.size": 6,  # default text
+        "axes.titlesize": 8,  # subplot titles
+        "axes.labelsize": 6,  # x/y axis labels
+        "xtick.labelsize": 6,  # x tick labels
+        "ytick.labelsize": 6,  # y tick labels
+        "legend.fontsize": 6,  # legend
+        "figure.titlesize": 8,  # suptitle
+    }
+)
+
+
+color_palette2 = {
+    "DMSO Control": "#888888",
+    "CHX Treated": "#66B2DD",
+    "PatA": "#E6A925",
+}
+fig_paper_newstyle, ax_paper_newstyle = plt.subplots(1, 1, figsize=(1.63, 2.5))
+
+sns.stripplot(
+    data=df,
+    x="RNAType",
+    y="MeanRNA_Cytoplasm_Granules_Ratio",
+    hue="Condition",
+    dodge=True,
+    palette=color_palette2,
+    alpha=0.4,
+    size=3,
+    ax=ax_paper_newstyle,
+    jitter=0.3,
+)
+sns.pointplot(
+    data=df,
+    x="RNAType",
+    y="MeanRNA_Cytoplasm_Granules_Ratio",
+    hue="Condition",
+    dodge=0.4,
+    errorbar="sd",  # standard error
+    estimator="median",  # or "mean"
+    capsize=0.075,
+    linestyle="none",
+    markersize=10,
+    marker="_",
+    err_kws=dict(linewidth=0.4, color="black"),
+    markeredgewidth=1,
+    palette="dark:black",
+    zorder=5,
+    ax=ax_paper_newstyle,
+)
+plt.tight_layout()
+sns.despine()
+fig_paper_newstyle.savefig(
+    "output/quantification_paper_newstyle.pdf", dpi=600, transparent=True
+)
 
 for feature in [
     "MeanRNAInGranules_Cytoplasm_Ratio",
@@ -631,8 +719,8 @@ def get_representative_ids(df, feature, rep_min=40, rep_max=60):
             min_val = np.percentile(sub_df[feature].values, rep_min)
             max_val = np.percentile(sub_df[feature].values, rep_max)
             if len(representative_ids) == 0:
-                print(sub_df.head(10))
-                print(sub_df.columns)
+                # print(sub_df.head(10))
+                # print(sub_df.columns)
                 representative_ids = sub_df.query(f"@min_val <= {feature} <= @max_val")[
                     "UID"
                 ].values
