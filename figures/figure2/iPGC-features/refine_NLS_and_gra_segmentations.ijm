@@ -122,13 +122,13 @@ function correctOrDrawMask(refPath, maskPath, folderName, label, colour) {
     // ---- prompt the user ----
     if (!maskExists || maskEmpty) {
         waitForUser("Draw " + label + " segmentation",
-            "Folder: " + displayName + "\n \n" +
+            "Folder: " + folderName + "\n \n" +
             "No " + label + " segmentation was found (file missing or empty).\n" +
             "Please draw the " + label + " boundary using any selection tool\n" +
             "(Freehand, Polygon, Brush, Wand …), then click OK.");
     } else {
         waitForUser("Correct " + label + " segmentation",
-            "Folder: " + displayName + "\n \n" +
+            "Folder: " + folderName + "\n \n" +
             "The " + colour + " overlay shows the current " + label + " segmentation.\n" +
             "Edit the selection as needed (Brush, Wand, Polygon, etc.),\n" +
             "then click OK to save and continue.");
@@ -138,18 +138,24 @@ function correctOrDrawMask(refPath, maskPath, folderName, label, colour) {
     selectImage(refID);
     selType = selectionType();   // -1 = no selection
 
-    newImage(label + "_corrected", "16-bit black", w, h, 1);
-	corrID = getImageID();
-	if (selType != -1) {
-	    run("Restore Selection");
-	    run("Fill", "slice");
-	}
-	run("Select None");
-	resetThreshold();
-	
-	saveAs("Tiff", maskPath);
-//	print("Saved " + label + " mask: " + maskPath);
-	close();
+    if (selType == -1) {
+        showMessage("Warning",
+            "No selection present for " + label + " in:\n" + folderName +
+            "\n\nMask file will NOT be updated.");
+        print("WARNING: no selection drawn for " + label + " in " + folderName + " – skipping save");
+    } else {
+        // ---- rasterise the (possibly new/edited) selection into a mask image ----
+        newImage(label + "_corrected", "16-bit black", w, h, 1);
+        corrID = getImageID();
+        run("Restore Selection");
+        run("Fill", "slice");
+        run("Select None");
+        resetThreshold();
+
+        saveAs("Tiff", maskPath);
+        print("Saved " + label + " mask: " + maskPath);
+        close();
+    }
 
     // ---- clean up ----
     if (roiManager("count") > 0) {

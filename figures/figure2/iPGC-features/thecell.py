@@ -35,7 +35,7 @@ class TheCell:
 
         date_str: str = ""
         cell_condition: str = ""
-        dev_stage: str = ""
+        dev_stage: str = "24hpf"  # Defaulting to 24hpf
         for split in file_name_splits:
             if re.match(r"\d{8}", split) or re.match(r"\d{4}-\d{2}-\d{2}", split):
                 date = (
@@ -52,6 +52,10 @@ class TheCell:
 
             if "hpf" in split.lower():
                 dev_stage = split
+        if cell_condition == "":
+            for condition in conditions:
+                if condition.lower() in file_name.lower():
+                    cell_condition = condition
 
         self.uid = uid
         self.acquisition_date = date_str
@@ -232,7 +236,7 @@ class TheCell:
             transform=ax[0].transAxes,
         )
 
-    def clean_segmentations(self):
+    def clean_segmentations(self, max_granule_size=650):
         # Fill holes in cell segmentation
         self.markers["cell"].segmentation = ndi.binary_fill_holes(
             self.markers["cell"].segmentation > 0
@@ -255,6 +259,14 @@ class TheCell:
         self.markers["nucleus"].segmentation = measure.label(
             self.markers["nucleus"].segmentation
         )
+
+        for granule_marker in [self.granuleA, self.granuleB]:
+            regions = measure.regionprops(self.markers[granule_marker].segmentation)
+            for region in regions:
+                if region.area > max_granule_size:
+                    self.markers[granule_marker].segmentation[
+                        self.markers[granule_marker].segmentation == region.label
+                    ] = 0
 
         self.log(
             "Cleaned segmentations by filling holes and removing segmentations outside of the cell"

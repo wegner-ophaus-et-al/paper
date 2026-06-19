@@ -28,7 +28,7 @@ for test_cell in sample_dir.iterdir():
     if test_cell.is_dir() and "figures" not in test_cell.name:
         cell_obj = TheCell(
             test_cell,
-            conditions=["full_mix", "no_tdrd7"],
+            conditions=["full_mix", "no_tdrd7a"],
             model_handler=model_handler,
             granuleA="dnd",
             granuleB="gra",

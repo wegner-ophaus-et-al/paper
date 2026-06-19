@@ -23,7 +23,6 @@ def contact_sheet(list_of_cells: list, save_dir: Path):
 
     figure_dir = save_dir / "figures"
     figure_dir.mkdir(exist_ok=True)
-    plt.tight_layout()
     fig.savefig(figure_dir / "contact_sheet.pdf")
     plt.close(fig)
 
@@ -102,6 +101,18 @@ def per_cell_summary(
     """
     Aggregate the granule features per cell and plot the summary statistics
     """
+    plt.rcParams.update(
+        {
+            "font.size": 6,  # default text
+            "axes.titlesize": 8,  # subplot titles
+            "axes.labelsize": 6,  # x/y axis labels
+            "xtick.labelsize": 6,  # x tick labels
+            "ytick.labelsize": 6,  # y tick labels
+            "legend.fontsize": 6,  # legend
+            "figure.titlesize": 8,  # suptitle
+        }
+    )
+
     df_agg = (
         df.groupby(["uid", "marker", "condition", "stage"])
         .agg(aggregation_function, numeric_only=True)
@@ -135,8 +146,8 @@ def per_cell_summary(
 
     ncols = 6
     nrows = 6
-    subfig_cw = 1.2
-    subfig_ch = 2
+    subfig_cw = 1.4
+    subfig_ch = 1.6
 
     fig = plt.figure(figsize=(ncols * subfig_cw, subfig_ch * nrows))
 
@@ -149,6 +160,7 @@ def per_cell_summary(
         [fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 3])],
         [fig.add_subplot(gs[1, 1]), fig.add_subplot(gs[1, 4])],
         [fig.add_subplot(gs[1, 2]), fig.add_subplot(gs[1, 5])],
+        # [fig.add_subplot(gs[4, 2]), fig.add_subplot(gs[2, 5])],
     ]
     axs_sum = [
         [fig.add_subplot(gs[2, 0]), fig.add_subplot(gs[2, 3])],
@@ -162,8 +174,8 @@ def per_cell_summary(
         [fig.add_subplot(gs[3, 2]), fig.add_subplot(gs[3, 5])],
     ]
     axs_kde = [
-        [fig.add_subplot(gs[4, :3]), fig.add_subplot(gs[4, 3:6])],
-        [fig.add_subplot(gs[5, :3]), fig.add_subplot(gs[5, 3:6])],
+        [fig.add_subplot(gs[4, :2]), fig.add_subplot(gs[4, 3:5])],
+        [fig.add_subplot(gs[5, :2]), fig.add_subplot(gs[5, 3:5])],
     ]
 
     log_scale_features = [
@@ -179,70 +191,147 @@ def per_cell_summary(
     ]
 
     for feature, ax in zip(features_mean, axs):
-        for ax_idx, marker in enumerate(["gra", "dnd1"]):
+        for ax_idx, marker in enumerate(["gra", "dnd"]):
             if feature in log_scale_features:
                 ax[ax_idx].set_yscale("log")
             if feature in clip_to_ten_features:
                 df_agg[feature] = df_agg[feature].clip(-10, 8)
-            sns.violinplot(
+
+            sns.stripplot(
                 data=df_agg[df_agg["marker"] == marker],
-                x="stage",
+                # x="stage",
                 y=feature,
-                order=["8hpf", "24hpf"],
                 hue="condition",
+                # order=["8hpf", "24hpf"],
                 hue_order=list(color_palette.keys())
                 if isinstance(color_palette, dict)
                 else None,
                 palette=color_palette,
-                split=True,
-                inner="quart",
+                dodge=0.4,
+                alpha=0.4,
+                size=2,
                 ax=ax[ax_idx],
-                linewidth=0.8,
-                legend=False,
+                jitter=0.3,
             )
-            ax[ax_idx].set_title(f"Mean", fontsize=8, fontweight="bold")
+
+            sns.pointplot(
+                data=df_agg[df_agg["marker"] == marker],
+                # x="stage",
+                y=feature,
+                hue="condition",
+                # order=["8hpf", "24hpf"],
+                hue_order=list(color_palette.keys())
+                if isinstance(color_palette, dict)
+                else None,
+                dodge=0.4,
+                ax=ax[ax_idx],
+                errorbar="sd",  # standard error
+                estimator="median",  # or "mean"
+                capsize=0.075,
+                linestyle="none",
+                markersize=10,
+                marker="_",
+                err_kws=dict(linewidth=0.5, color="black"),
+                markeredgewidth=1,
+                palette="dark:black",
+                zorder=5,
+            )
+
+            ax[ax_idx].set_title(f"Mean", fontweight="bold")
 
     for feature, ax in zip(features_sum, axs_sum):
-        for ax_idx, marker in enumerate(["gra", "dnd1"]):
+        for ax_idx, marker in enumerate(["gra", "dnd"]):
             if feature in log_scale_features:
                 ax[ax_idx].set_yscale("log")
-            sns.violinplot(
+
+            sns.stripplot(
                 data=df_agg_sum[df_agg_sum["marker"] == marker],
-                x="stage",
+                # x="stage",
                 y=feature,
                 hue="condition",
+                # order=["8hpf", "24hpf"],
                 hue_order=list(color_palette.keys())
                 if isinstance(color_palette, dict)
                 else None,
                 palette=color_palette,
-                split=True,
-                inner="quart",
+                dodge=0.4,
+                alpha=0.4,
+                size=2,
                 ax=ax[ax_idx],
-                linewidth=0.8,
-                legend=False,
+                jitter=0.3,
             )
-            ax[ax_idx].set_title(f"Sum", fontsize=8, fontweight="bold")
+
+            sns.pointplot(
+                data=df_agg_sum[df_agg_sum["marker"] == marker],
+                # x="stage",
+                y=feature,
+                hue="condition",
+                # order=["8hpf", "24hpf"],
+                hue_order=list(color_palette.keys())
+                if isinstance(color_palette, dict)
+                else None,
+                dodge=0.4,
+                ax=ax[ax_idx],
+                errorbar="sd",  # standard error
+                estimator="median",  # or "mean"
+                capsize=0.075,
+                linestyle="none",
+                markersize=10,
+                marker="_",
+                err_kws=dict(linewidth=0.5, color="black"),
+                markeredgewidth=1,
+                palette="dark:black",
+                zorder=5,
+            )
+
+            ax[ax_idx].set_title(f"Sum", fontweight="bold")
 
     for feature, ax in zip(features_std, axs_std):
-        for ax_idx, marker in enumerate(["gra", "dnd1"]):
+        for ax_idx, marker in enumerate(["gra", "dnd"]):
             if feature in log_scale_features:
                 ax[ax_idx].set_yscale("log")
-            sns.violinplot(
+
+            sns.stripplot(
                 data=df_agg_std[df_agg_std["marker"] == marker],
-                x="stage",
+                # x="stage",
                 y=feature,
                 hue="condition",
+                # order=["8hpf", "24hpf"],
                 hue_order=list(color_palette.keys())
                 if isinstance(color_palette, dict)
                 else None,
                 palette=color_palette,
-                split=True,
-                inner="quart",
+                dodge=0.4,
+                alpha=0.4,
+                size=2,
                 ax=ax[ax_idx],
-                linewidth=0.8,
-                legend=False,
+                jitter=0.3,
             )
-            ax[ax_idx].set_title(f"Std", fontsize=8, fontweight="bold")
+
+            sns.pointplot(
+                data=df_agg_std[df_agg_std["marker"] == marker],
+                # x="stage",
+                y=feature,
+                hue="condition",
+                # order=["8hpf", "24hpf"],
+                hue_order=list(color_palette.keys())
+                if isinstance(color_palette, dict)
+                else None,
+                dodge=0.4,
+                ax=ax[ax_idx],
+                errorbar="sd",  # standard error
+                estimator="median",  # or "mean"
+                capsize=0.075,
+                linestyle="none",
+                markersize=10,
+                marker="_",
+                err_kws=dict(linewidth=0.4, color="black"),
+                markeredgewidth=1,
+                palette="dark:black",
+                zorder=5,
+            )
+
+            ax[ax_idx].set_title(f"Std", fontweight="bold")
 
     def _forward(x):
         return np.where(
@@ -258,16 +347,12 @@ def per_cell_summary(
             (x - nuclear_fraction) / (1 - nuclear_fraction),
         )
 
-    for ax, dev_stage in zip(axs_kde, ["8hpf", "24hpf"]):
-        for ax_idx, marker in enumerate(["gra", "dnd1"]):
-            data_kde = df_agg[
-                (df_agg["marker"] == marker) & (df_agg["stage"] == dev_stage)
-            ]
+    for ax in axs_kde:
+        for ax_idx, marker in enumerate(["gra", "dnd"]):
+            data_kde = df_agg[df_agg["marker"] == marker]
             nuclear_fraction = float(data_kde["FranctionAlongRayToCellBoundary"].mean())
 
-            print(
-                f"Marker: {marker}, Stage: {dev_stage}, Nuclear Fraction: {nuclear_fraction:.2f}"
-            )
+            print(f"Marker: {marker}, Nuclear Fraction: {nuclear_fraction:.2f}")
 
             sns.kdeplot(
                 data=data_kde,
@@ -278,15 +363,15 @@ def per_cell_summary(
                 ax=ax[ax_idx],
             )
             ax[ax_idx].set_xscale("function", functions=(_forward, _inverse))
-            ax[ax_idx].set_xlim(-1, 1)
-            tick_positions = [-1, 0, 1]
-            tick_labels = ["Nucleus centroid", "Nucleus boundary", "Cell boundary"]
-            ax[ax_idx].set_xticks(tick_positions, labels=tick_labels)
-            aspect_ratio = 0.075
+            ax[ax_idx].set_xlim(-0.5, 1)
+            tick_positions = [-0.5, 0, 0.5, 1]
+            # tick_labels = ["Nucleus centroid", "Nucleus boundary", "Cell boundary"]
+            ax[ax_idx].set_xlabel("Relative Nuclear Distance")
+            ax[ax_idx].set_xticks(tick_positions)  # , labels=tick_labels)
+            aspect_ratio = 0.07
             ax[ax_idx].set_aspect(aspect_ratio)
             ax[ax_idx].set_title(
-                f"Relative Nuclear Distance of {marker.capitalize()} at {dev_stage}",
-                fontsize=8,
+                f"Relative Nuclear Distance of {marker.capitalize()} at",
                 fontweight="bold",
             )
 
@@ -338,139 +423,139 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
     figure_dir = save_dir / "figures" / "fold_change"
     figure_dir.mkdir(exist_ok=True, parents=True)
 
-    stage_order = [
-        stage for stage in ["8hpf", "24hpf"] if stage in df["stage"].unique()
-    ]
+    stage_order = [stage for stage in df["stage"].unique()]
     if not stage_order:
         stage_order = list(df["stage"].dropna().unique())
 
     marker_order = [
-        marker for marker in ["gra", "dnd1"] if marker in df["marker"].unique()
+        marker for marker in ["gra", "dnd"] if marker in df["marker"].unique()
     ]
     if not marker_order:
         marker_order = list(df["marker"].dropna().unique())
 
-    conditions = [
-        condition
-        for condition in ["ctrl", "kd"]
-        if condition in df["condition"].unique()
-    ]
+    conditions = [condition for condition in df["condition"].unique()]
 
-    for stage in stage_order:
-        for marker in marker_order:
-            subset = df[(df["stage"] == stage) & (df["marker"] == marker)]
-            if subset.empty:
-                continue
+    for marker in marker_order:
+        subset = df[df["marker"] == marker]
+        subset = (
+            subset.groupby(["uid", "condition"])[feature_columns].mean().reset_index()
+        )
+        if subset.empty:
+            continue
 
-            x_positions = np.arange(len(feature_columns))
-            fold_changes = []
-            p_values = []
-            summary_lines = [f"{marker} at {stage}:"]
+        x_positions = np.arange(len(feature_columns))
+        fold_changes = []
+        p_values = []
+        summary_lines = [f"{marker}:"]
+        second_col_start = 35
+        summary_lines.append(
+            f"   n_samples ctrl:{' ' * (second_col_start - 14)}{len(subset.loc[subset['condition'] == conditions[0]])}"
+        )
+        summary_lines.append(
+            f"   n_samples kd:{' ' * (second_col_start - 12)}{len(subset.loc[subset['condition'] == conditions[1]])}"
+        )
 
-            def _clean_feature_values(series):
-                values = series.dropna().to_numpy()
-                if np.iscomplexobj(values):
-                    values = np.real(values)
-                values = np.asarray(values, dtype=float)
-                return values[np.isfinite(values)]
+        def _clean_feature_values(series):
+            values = series.dropna().to_numpy()
+            if np.iscomplexobj(values):
+                values = np.real(values)
+            values = np.asarray(values, dtype=float)
+            return values[np.isfinite(values)]
 
-            for feature in feature_columns:
-                ctrl_values = _clean_feature_values(
-                    subset.loc[subset["condition"] == "ctrl", feature]
+        for feature in feature_columns:
+            ctrl_values = _clean_feature_values(
+                subset.loc[subset["condition"] == conditions[0], feature]
+            )
+            kd_values = _clean_feature_values(
+                subset.loc[subset["condition"] == conditions[1], feature]
+            )
+
+            if len(ctrl_values) == 0 or len(kd_values) == 0:
+                fold_changes.append(np.nan)
+            else:
+                ctrl_mean = float(np.mean(ctrl_values))
+                kd_mean = float(np.mean(kd_values))
+                fold_changes.append(
+                    abs(float(kd_mean / ctrl_mean)) if ctrl_mean != 0 else np.nan
                 )
-                kd_values = _clean_feature_values(
-                    subset.loc[subset["condition"] == "kd", feature]
-                )
 
-                if len(ctrl_values) == 0 or len(kd_values) == 0:
-                    fold_changes.append(np.nan)
-                else:
-                    ctrl_mean = float(np.mean(ctrl_values))
-                    kd_mean = float(np.mean(kd_values))
-                    fold_changes.append(
-                        abs(float(kd_mean / ctrl_mean)) if ctrl_mean != 0 else np.nan
-                    )
-
-                if len(conditions) == 2:
-                    if len(ctrl_values) < 2 or len(kd_values) < 2:
-                        p_values.append(np.nan)
-                    else:
-                        _, _, p_value = statistical_analysis(
-                            ctrl_values.tolist(), kd_values.tolist()
-                        )
-                        p_values.append(float(p_value))
-                else:
+            if len(conditions) == 2:
+                if len(ctrl_values) < 2 or len(kd_values) < 2:
                     p_values.append(np.nan)
-
-                ratio_text = (
-                    "nan" if np.isnan(fold_changes[-1]) else f"{fold_changes[-1]:.6g}"
-                )
-                p_value_text = (
-                    "nan" if np.isnan(p_values[-1]) else f"{p_values[-1]:.6g}"
-                )
-                summary_lines.append(
-                    f"   {feature}:   {ratio_text}\t {p_value_text}\t {get_stars(p_values[-1])}"
-                )
-
-            fig, (ax_mean, ax_pvalue) = plt.subplots(
-                2,
-                1,
-                figsize=(max(12, len(feature_columns) * 0.5), 8),
-                sharex=True,
-            )
-
-            ax_mean.bar(
-                x_positions,
-                fold_changes,
-                color=palette[0],
-                edgecolor="black",
-                alpha=0.8,
-            )
-            ax_mean.set_ylabel("kd / ctrl")
-            ax_mean.set_title(f"{stage} / {marker} - feature fold change")
-            ax_mean.tick_params(axis="x", labelbottom=False)
-            ax_mean.set_ylim(0, 10)
-
-            ax_pvalue.bar(
-                x_positions,
-                p_values,
-                color=palette[1] if len(palette) > 1 else palette[0],
-                alpha=0.8,
-                edgecolor="black",
-            )
-            ax_pvalue.axhline(0.05, color="black", linestyle="--", linewidth=1)
-            ax_pvalue.set_ylabel("p-value")
-            ax_pvalue.set_xlabel("Features")
-            ax_pvalue.set_ylim(10e-10, 1)
-            ax_pvalue.set_xticks(x_positions)
-            ax_pvalue.set_xticklabels(feature_columns, rotation=45, ha="right")
-            ax_pvalue.set_title(f"{stage} / {marker} - ctrl vs kd p-values")
-            ax_pvalue.set_yscale("log")
-
-            for x_pos, p_value in zip(x_positions, p_values):
-                if np.isnan(p_value):
-                    label_y = 1e-9
                 else:
-                    label_y = max(p_value * 1.4, 1e-9)
-                ax_pvalue.text(
-                    x_pos,
-                    label_y,
-                    get_stars(p_value),
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                    fontweight="bold",
-                )
+                    _, _, p_value = statistical_analysis(
+                        ctrl_values.tolist(), kd_values.tolist()
+                    )
+                    p_values.append(float(p_value))
+            else:
+                p_values.append(np.nan)
 
-            fig.tight_layout()
-            sns.despine(fig=fig)
-            fig.savefig(
-                figure_dir / f"fold_change_{stage}_{marker}.pdf", bbox_inches="tight"
+            ratio_text = (
+                "nan" if np.isnan(fold_changes[-1]) else f"{fold_changes[-1]:.6g}"
             )
-            plt.close(fig)
+            p_value_text = "nan" if np.isnan(p_values[-1]) else f"{p_values[-1]:.6g}"
+            summary_lines.append(
+                f"   {feature}:{' ' * (second_col_start - len(str(feature)))}{ratio_text[:5]}\t {p_value_text}\t {get_stars(p_values[-1])}"
+            )
 
-            summary_path = figure_dir / f"fold_change_{stage}_{marker}.txt"
-            summary_path.write_text("\n".join(summary_lines) + "\n")
+        fig, (ax_mean, ax_pvalue) = plt.subplots(
+            2,
+            1,
+            figsize=(max(12, len(feature_columns) * 0.5), 8),
+            sharex=True,
+        )
+
+        ax_mean.bar(
+            x_positions,
+            fold_changes,
+            color=palette[0],
+            edgecolor="black",
+            alpha=0.8,
+        )
+        ax_mean.set_ylabel("kd / ctrl")
+        ax_mean.set_title(f"{marker} - feature fold change")
+        ax_mean.tick_params(axis="x", labelbottom=False)
+        ax_mean.set_ylim(0, 3)
+        ax_mean.axhline(1, color="black", linestyle="--", linewidth=1)
+
+        ax_pvalue.bar(
+            x_positions,
+            p_values,
+            color=palette[1] if len(palette) > 1 else palette[0],
+            alpha=0.8,
+            edgecolor="black",
+        )
+        ax_pvalue.axhline(0.05, color="black", linestyle="--", linewidth=1)
+        ax_pvalue.set_ylabel("p-value")
+        ax_pvalue.set_xlabel("Features")
+        ax_pvalue.set_ylim(10e-10, 1)
+        ax_pvalue.set_xticks(x_positions)
+        ax_pvalue.set_xticklabels(feature_columns, rotation=45, ha="right")
+        ax_pvalue.set_title(f"{marker} - ctrl vs kd p-values")
+        ax_pvalue.set_yscale("log")
+
+        for x_pos, p_value in zip(x_positions, p_values):
+            if np.isnan(p_value):
+                label_y = 1e-9
+            else:
+                label_y = max(p_value * 1.4, 1e-9)
+            ax_pvalue.text(
+                x_pos,
+                label_y,
+                get_stars(p_value),
+                ha="center",
+                va="bottom",
+                fontsize=8,
+                fontweight="bold",
+            )
+
+        fig.tight_layout()
+        sns.despine(fig=fig)
+        fig.savefig(figure_dir / f"fold_change_{marker}.pdf", bbox_inches="tight")
+        plt.close(fig)
+
+        summary_path = figure_dir / f"fold_change_{marker}.txt"
+        summary_path.write_text("\n".join(summary_lines) + "\n")
 
 
 def plot_ridgeplot(df, marker: str, ax, feature: str = "featureX"):
@@ -585,7 +670,6 @@ def cell_features(df, save_dir: Path, color_palette="Set2"):
     df_cell = df.copy()
 
     conditions = df_cell["condition"].dropna().unique()
-    stages = df_cell["stage"].dropna().unique()
 
     feature_columns = [
         column
@@ -593,101 +677,140 @@ def cell_features(df, save_dir: Path, color_palette="Set2"):
         if column not in skip_columns and df_cell[column].notna().any()
     ]
 
-    for stage in stages:
-        if not len(conditions) == 2:
-            raise ValueError(
-                f"Expected exactly 2 conditions for stage {stage}, but found {len(conditions)}: {conditions}"
+    feature_names = []
+    feature_means = []
+    feature_pvalues = []
+    sample_numbers = []
+    for feature in feature_columns:
+        condition_values = []
+        for condition in conditions:
+            df_cond = df_cell[df_cell["condition"] == condition]
+            cond_values = df_cond[feature].dropna().to_numpy()
+            condition_values.append(
+                {
+                    "condition_name": condition,
+                    "mean": np.mean(cond_values) if len(cond_values) > 0 else np.nan,
+                    "count": len(cond_values),
+                    "values": cond_values.tolist(),
+                }
             )
-        feature_names = []
-        feature_means = []
-        feature_pvalues = []
-        sample_numbers = []
-        for feature in feature_columns:
-            condition_values = []
-            for condition in conditions:
-                df_cond = df_cell[
-                    (df_cell["stage"] == stage) & (df_cell["condition"] == condition)
-                ]
-                cond_values = df_cond[feature].dropna().to_numpy()
-                condition_values.append(
-                    {
-                        "condition_name": condition,
-                        "mean": np.mean(cond_values)
-                        if len(cond_values) > 0
-                        else np.nan,
-                        "count": len(cond_values),
-                        "values": cond_values.tolist(),
-                    }
-                )
-            if not len(condition_values) == 2:
-                raise ValueError(
-                    f"Expected exactly 2 conditions for feature {feature} at stage {stage}, but found {len(condition_values)}: {condition_values}"
-                )
-            feature_names.append(feature)
-            feature_means.append(
-                abs(float(condition_values[1]["mean"] / condition_values[0]["mean"]))
+        feature_names.append(feature)
+        feature_means.append(
+            abs(float(condition_values[1]["mean"] / condition_values[0]["mean"]))
+        )
+        feature_pvalues.append(
+            get_stars(
+                statistical_analysis(
+                    condition_values[0]["values"], condition_values[1]["values"]
+                )[2]
             )
-            feature_pvalues.append(
-                get_stars(
-                    statistical_analysis(
-                        condition_values[0]["values"], condition_values[1]["values"]
-                    )[2]
-                )
-            )
-            sample_numbers.append(
-                (condition_values[0]["count"], condition_values[1]["count"])
-            )
-
-        fig, ax = plt.subplots(
-            2, 1, figsize=(max(12, len(feature_columns) * 0.5), 8), sharex=True
+        )
+        sample_numbers.append(
+            (condition_values[0]["count"], condition_values[1]["count"])
         )
 
-        ax[0].bar(
-            feature_names,
-            feature_means,
-            color="#B9B9B9",
-            alpha=0.8,
-            edgecolor="black",
+    fig, ax = plt.subplots(
+        2, 1, figsize=(max(12, len(feature_columns) * 0.5), 8), sharex=True
+    )
+
+    ax[0].bar(
+        feature_names,
+        feature_means,
+        color="#B9B9B9",
+        alpha=0.8,
+        edgecolor="black",
+    )
+
+    ax[0].axhline(1, color="black", linestyle="--", linewidth=1)
+    ax[0].set_ylabel(f"{conditions[1]} / {conditions[0]}")
+    ax[0].set_title("cell feature fold change", fontsize=11, fontweight="bold")
+    ax[0].set_ylim(0, 3)
+    ax[0].tick_params(axis="x", labelbottom=False)
+    ax[1].bar(
+        feature_names,
+        feature_pvalues,
+        color="#B9B9B9",
+        alpha=0.8,
+        edgecolor="black",
+    )
+    ax[1].axhline(0.05, color="black", linestyle="--", linewidth=1)
+    ax[1].set_ylabel("p-value")
+    ax[1].set_xlabel("Features")
+    ax[1].set_ylim(10e-10, 1)
+    ax[1].set_xticks(range(len(feature_names)))
+    ax[1].set_xticklabels(feature_names, rotation=45, ha="right")
+    ax[1].set_title(" ctrl vs kd p-values", fontsize=11, fontweight="bold")
+    ax[1].set_yscale("log")
+
+    fig.tight_layout()
+    save_path = save_dir / "figures" / "cell_features" / "cell_feature_fold_change_.pdf"
+    save_path.parent.mkdir(exist_ok=True, parents=True)
+    fig.savefig(save_path)
+    plt.close(fig)
+
+    with open(save_path.parent / "cell_feature_fold_change.txt", "w") as f:
+        f.write("cell feature fold change:\n")
+        for name, mean, pval, (n1, n2) in zip(
+            feature_names, feature_means, feature_pvalues, sample_numbers
+        ):
+            f.write(f"   {name}:   {mean:.6g}\t {pval}\t (n={n1}, n={n2})\n")
+
+    subfig_cw = 1.4
+    subfig_ch = 1.8
+
+    fig_comparison, ax_comparison = plt.subplots(
+        nrows=1,
+        ncols=len(feature_columns),
+        figsize=(len(feature_columns) * subfig_cw, subfig_ch),
+    )
+
+    for ax_idx, feature in enumerate(feature_columns):
+        sns.stripplot(
+            data=df_cell,
+            # x="stage",
+            y=feature,
+            hue="condition",
+            # order=["8hpf", "24hpf"],
+            hue_order=list(color_palette.keys())
+            if isinstance(color_palette, dict)
+            else None,
+            palette=color_palette,
+            dodge=0.4,
+            alpha=0.4,
+            size=2,
+            ax=ax_comparison[ax_idx],
+            jitter=0.3,
         )
 
-        ax[0].set_ylabel(f"{conditions[1]} / {conditions[0]}")
-        ax[0].set_title(
-            f"{stage} - cell feature fold change", fontsize=11, fontweight="bold"
+        sns.pointplot(
+            data=df_cell,
+            # x="stage",
+            y=feature,
+            hue="condition",
+            # order=["8hpf", "24hpf"],
+            hue_order=list(color_palette.keys())
+            if isinstance(color_palette, dict)
+            else None,
+            dodge=0.4,
+            ax=ax_comparison[ax_idx],
+            errorbar="sd",  # standard error
+            estimator="median",  # or "mean"
+            capsize=0.075,
+            linestyle="none",
+            markersize=10,
+            marker="_",
+            err_kws=dict(linewidth=0.4, color="black"),
+            markeredgewidth=1,
+            palette="dark:black",
+            zorder=5,
         )
-        ax[0].set_ylim(0, 10)
-        ax[0].tick_params(axis="x", labelbottom=False)
-        ax[1].bar(
-            feature_names,
-            feature_pvalues,
-            color="#B9B9B9",
-            alpha=0.8,
-            edgecolor="black",
-        )
-        ax[1].axhline(0.05, color="black", linestyle="--", linewidth=1)
-        ax[1].set_ylabel("p-value")
-        ax[1].set_xlabel("Features")
-        ax[1].set_ylim(10e-10, 1)
-        ax[1].set_xticks(range(len(feature_names)))
-        ax[1].set_xticklabels(feature_names, rotation=45, ha="right")
-        ax[1].set_title(
-            f"{stage} - ctrl vs kd p-values", fontsize=11, fontweight="bold"
-        )
-        ax[1].set_yscale("log")
-
-        fig.tight_layout()
-        save_path = (
-            save_dir
-            / "figures"
-            / "cell_features"
-            / f"cell_feature_fold_change_{stage}.pdf"
-        )
-        save_path.parent.mkdir(exist_ok=True, parents=True)
-        fig.savefig(save_path)
-        plt.close(fig)
-
-        with open(save_path.parent / f"cell_feature_fold_change_{stage}.txt", "w") as f:
-            f.write(f"{stage} cell feature fold change:\n")
-            for name, mean, pval, (n1, n2) in zip(
-                feature_names, feature_means, feature_pvalues, sample_numbers
-            ):
-                f.write(f"   {name}:   {mean:.6g}\t {pval}\t (n={n1}, n={n2})\n")
+    fig_comparison.tight_layout()
+    sns.despine()
+    fig_comparison.suptitle("Comparison of Cell Features", fontweight="bold")
+    # fig_comparison.subplots_adjust(top=0.88)
+    figure_dir = save_dir / "figures" / "cell_features"
+    figure_dir.mkdir(exist_ok=True, parents=True)
+    fig_comparison.savefig(
+        figure_dir / "cell_features_comparison.pdf", transparent=True
+    )
+    plt.close(fig_comparison)
