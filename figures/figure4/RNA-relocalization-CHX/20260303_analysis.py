@@ -643,6 +643,7 @@ plt.rcParams.update(
     }
 )
 
+plt.rcParams["font.family"] = "Arial"
 
 color_palette2 = {
     "DMSO Control": "#888888",
