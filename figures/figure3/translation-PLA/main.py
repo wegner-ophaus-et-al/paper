@@ -99,6 +99,7 @@ def generate_figures(df):
             "figure.titlesize": 8,  # suptitle
         }
     )
+    plt.rcParams["font.family"] = "Arial"
     unique_measurements_fig = df["measurement_name"].unique()
     number_unique_measurements_fig = len(unique_measurements_fig)
     ncols = 8
