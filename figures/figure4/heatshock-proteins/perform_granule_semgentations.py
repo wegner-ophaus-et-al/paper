@@ -8,6 +8,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 from utils.utils import statistical_analysis, get_stars, get_representative_ids
 import numpy as np
+import matplotlib as mpl
 
 
 sm_g = SegmentationModel(
@@ -49,45 +50,101 @@ fig_summary.tight_layout()
 plt.savefig(root / "granule_segmentation_summary.pdf", dpi=300, bbox_inches="tight")
 
 df = pd.DataFrame(data_records)
-df["mean_int_ratio_stress_granules_to_cytoplasm"] = (
-    df["mean_int_stress_granules"] / df["mean_int_stress_cytoplasm"]
+df["mean_int_ratio_stress_cytoplasm_to_granule"] = (
+    df["mean_int_stress_cytoplasm"] / df["mean_int_stress_granules"]
 )
 
 df.to_csv(root / "granule_segmentation_results.csv", index=False)
 
-color_palette = {"control": "#666666", "heatshock": "#EB4747"}
+color_palette = {"control": "#888888", "heatshock": "#b04a46"}
 
 sns.set_style("ticks")
-fig, ax = plt.subplots(figsize=(4, 6))
-sns.violinplot(
+# fig, ax = plt.subplots(figsize=(4, 6))
+# sns.violinplot(
+#     data=df,
+#     y="mean_int_ratio_stress_cytoplasm_to_granule",
+#     x="construct_id",
+#     hue="condition",
+#     hue_order=["control", "heatshock"],
+#     palette=color_palette,
+#     ax=ax,
+#     split=True,
+#     inner="quart",
+# )
+# sns.swarmplot(
+#     data=df,
+#     y="mean_int_ratio_stress_cytoplasm_to_granule",
+#     x="construct_id",
+#     hue="condition",
+#     hue_order=["control", "heatshock"],
+#     palette=["black"],
+#     dodge=True,
+#     ax=ax,
+# )
+#
+
+plt.rcParams.update(
+    {
+        "font.size": 6,  # default text
+        "axes.titlesize": 8,  # subplot titles
+        "axes.labelsize": 6,  # x/y axis labels
+        "xtick.labelsize": 6,  # x tick labels
+        "ytick.labelsize": 6,  # y tick labels
+        "legend.fontsize": 6,  # legend
+        "figure.titlesize": 8,  # suptitle
+    }
+)
+
+
+mpl.rcParams["font.family"] = "Arial"
+
+fig_mean_cyto_gran_newstyle, ax_mean_cyto_gran_newstyle = plt.subplots(
+    1, 1, figsize=(1.63, 2.5)
+)
+
+ax = ax_mean_cyto_gran_newstyle
+
+sns.stripplot(
     data=df,
-    y="mean_int_ratio_stress_granules_to_cytoplasm",
+    y="mean_int_ratio_stress_cytoplasm_to_granule",
     x="construct_id",
     hue="condition",
     hue_order=["control", "heatshock"],
     palette=color_palette,
+    dodge=True,
+    alpha=0.4,
+    size=3,
     ax=ax,
-    split=True,
-    inner="quart",
+    jitter=0.3,
 )
-sns.swarmplot(
+sns.pointplot(
     data=df,
-    y="mean_int_ratio_stress_granules_to_cytoplasm",
+    y="mean_int_ratio_stress_cytoplasm_to_granule",
     x="construct_id",
     hue="condition",
     hue_order=["control", "heatshock"],
-    palette=["black"],
-    dodge=True,
+    dodge=0.4,
+    errorbar="sd",
+    estimator="median",
+    capsize=0.075,
+    linestyle="none",
+    markersize=10,
+    marker="_",
+    err_kws=dict(linewidth=0.4, color="black"),
+    markeredgewidth=1,
+    palette="dark:black",
+    zorder=5,
     ax=ax,
 )
 
 
 sns.despine()
-plt.savefig(root / "granule_segmentation_results.png", dpi=300, bbox_inches="tight")
+plt.tight_layout()
+plt.savefig(root / "cytoplasm_granule_stress_pointplot.pdf", bbox_inches="tight")
 plt.close()
 
 feature_to_get_stats_from = [
-    "mean_int_ratio_stress_granules_to_cytoplasm",
+    "mean_int_ratio_stress_cytoplasm_to_granule",
     "total_cell_area",
     "total_granules_area",
 ]

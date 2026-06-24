@@ -4,3 +4,7 @@ data/seg_test
 .DS_Store
 Untitled.ipynb
 __pycache__
+__marimo__/session
+converted.py
+unknown.ipynb
+unknown.py

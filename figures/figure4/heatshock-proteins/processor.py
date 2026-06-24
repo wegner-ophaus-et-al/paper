@@ -94,6 +94,15 @@ def process_sample(
     ax[0].imshow(int_img["granulito"], cmap="gray")
     ax[0].contour(lbl_img["granules"], colors="r", linewidths=0.5)
     ax[0].set_title("Granulito")
+    ax[0].text(
+        -0.05,
+        0.5,  # x slightly outside the left edge, y centered
+        f"{uid}-{condition}",
+        transform=ax[0].transAxes,
+        rotation=90,
+        va="center",
+        ha="right",
+    )
 
     ax[1].imshow(int_img["stress_marker"], cmap="gray")
     ax[1].contour(lbl_img["granules"], colors="r", linewidths=0.5)
