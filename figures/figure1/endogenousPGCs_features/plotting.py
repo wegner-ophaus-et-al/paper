@@ -160,6 +160,7 @@ def per_cell_summary(
         [fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 3])],
         [fig.add_subplot(gs[1, 1]), fig.add_subplot(gs[1, 4])],
         [fig.add_subplot(gs[1, 2]), fig.add_subplot(gs[1, 5])],
+        # [fig.add_subplot(gs[4, 2]), fig.add_subplot(gs[2, 5])],
     ]
     axs_sum = [
         [fig.add_subplot(gs[2, 0]), fig.add_subplot(gs[2, 3])],
@@ -458,6 +459,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
             x_positions = np.arange(len(feature_columns))
             fold_changes = []
             p_values = []
+            test_names = []
             summary_lines = [f"{marker} at {stage}:"]
             second_col_start = 35
             summary_lines.append(
@@ -495,10 +497,11 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                     if len(ctrl_values) < 2 or len(kd_values) < 2:
                         p_values.append(np.nan)
                     else:
-                        _, _, p_value = statistical_analysis(
+                        test_name, _, p_value = statistical_analysis(
                             ctrl_values.tolist(), kd_values.tolist()
                         )
                         p_values.append(float(p_value))
+                        test_names.append(test_name)
                 else:
                     p_values.append(np.nan)
 
@@ -509,8 +512,40 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                     "nan" if np.isnan(p_values[-1]) else f"{p_values[-1]:.6g}"
                 )
                 summary_lines.append(
-                    f"   {feature}:{' ' * (second_col_start - len(str(feature)))}{ratio_text[:5]}\t {p_value_text}\t {get_stars(p_values[-1])}"
+                    f"   {feature}:{' ' * (second_col_start - len(str(feature)))}{ratio_text[:5]}\t {p_value_text}\t {get_stars(p_values[-1])}\t {test_names[-1] if len(test_names) > 0 else 'N/A'}"
                 )
+            subset_sum = df[(df["stage"] == stage) & (df["marker"] == marker)]
+            subset_sum = (
+                subset.groupby(["uid", "condition"])[feature_columns]
+                .sum()
+                .reset_index()
+            )
+            if subset.empty:
+                continue
+
+            sph_vol_mean_ctrl = float(
+                subset_sum.loc[
+                    subset_sum["condition"] == "ctrl", "SphericalVolume"
+                ].mean()
+            )
+            sph_vol_mean_kd = float(
+                subset_sum.loc[
+                    subset_sum["condition"] == "kd", "SphericalVolume"
+                ].mean()
+            )
+
+            p_value_sph_vol = np.nan
+            stat_test_name, _, p_value_sph_vol = statistical_analysis(
+                subset_sum.loc[subset_sum["condition"] == "ctrl", "SphericalVolume"]
+                .dropna()
+                .tolist(),
+                subset_sum.loc[subset_sum["condition"] == "kd", "SphericalVolume"]
+                .dropna()
+                .tolist(),
+            )
+            summary_lines.append(
+                f"   SumSpherical:{' ' * second_col_start} {sph_vol_mean_kd / sph_vol_mean_ctrl:.6g}\t {p_value_sph_vol:.6g}\t {get_stars(p_value_sph_vol)}\t {stat_test_name}"
+            )
 
             fig, (ax_mean, ax_pvalue) = plt.subplots(
                 2,
@@ -529,7 +564,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
             ax_mean.set_ylabel("kd / ctrl")
             ax_mean.set_title(f"{stage} / {marker} - feature fold change")
             ax_mean.tick_params(axis="x", labelbottom=False)
-            ax_mean.set_ylim(0, 10)
+            ax_mean.set_ylim(0, 3)
             ax_mean.axhline(1, color="black", linestyle="--", linewidth=1)
 
             ax_pvalue.bar(
@@ -751,11 +786,12 @@ def cell_features(df, save_dir: Path, color_palette="Set2"):
             edgecolor="black",
         )
 
+        ax[0].axhline(1, color="black", linestyle="--", linewidth=1)
         ax[0].set_ylabel(f"{conditions[1]} / {conditions[0]}")
         ax[0].set_title(
             f"{stage} - cell feature fold change", fontsize=11, fontweight="bold"
         )
-        ax[0].set_ylim(0, 10)
+        ax[0].set_ylim(0, 3)
         ax[0].tick_params(axis="x", labelbottom=False)
         ax[1].bar(
             feature_names,
@@ -792,3 +828,63 @@ def cell_features(df, save_dir: Path, color_palette="Set2"):
                 feature_names, feature_means, feature_pvalues, sample_numbers
             ):
                 f.write(f"   {name}:   {mean:.6g}\t {pval}\t (n={n1}, n={n2})\n")
+
+    subfig_cw = 1.4
+    subfig_ch = 2
+
+    fig_comparison, ax_comparison = plt.subplots(
+        nrows=1,
+        ncols=len(feature_columns),
+        figsize=(len(feature_columns) * subfig_cw, subfig_ch),
+    )
+
+    for ax_idx, feature in enumerate(feature_columns):
+        sns.stripplot(
+            data=df_cell,
+            x="stage",
+            y=feature,
+            hue="condition",
+            order=["8hpf", "24hpf"],
+            hue_order=list(color_palette.keys())
+            if isinstance(color_palette, dict)
+            else None,
+            palette=color_palette,
+            dodge=0.4,
+            alpha=0.4,
+            size=2,
+            ax=ax_comparison[ax_idx],
+            jitter=0.3,
+        )
+
+        sns.pointplot(
+            data=df_cell,
+            x="stage",
+            y=feature,
+            hue="condition",
+            order=["8hpf", "24hpf"],
+            hue_order=list(color_palette.keys())
+            if isinstance(color_palette, dict)
+            else None,
+            dodge=0.4,
+            ax=ax_comparison[ax_idx],
+            errorbar="sd",  # standard error
+            estimator="median",  # or "mean"
+            capsize=0.075,
+            linestyle="none",
+            markersize=10,
+            marker="_",
+            err_kws=dict(linewidth=0.4, color="black"),
+            markeredgewidth=1,
+            palette="dark:black",
+            zorder=5,
+        )
+    fig_comparison.tight_layout()
+    sns.despine()
+    fig_comparison.suptitle("Comparison of Cell Features", fontweight="bold")
+    # fig_comparison.subplots_adjust(top=0.88)
+    figure_dir = save_dir / "figures" / "cell_features"
+    figure_dir.mkdir(exist_ok=True, parents=True)
+    fig_comparison.savefig(
+        figure_dir / "cell_features_comparison.pdf", transparent=True
+    )
+    plt.close(fig_comparison)
