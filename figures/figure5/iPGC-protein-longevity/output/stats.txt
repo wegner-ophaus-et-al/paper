@@ -1,0 +1,36 @@
+Statistical analysis for dnd_normalized:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.3293, significance = ns
+	 24hpf stage:
+	 	 test-type = t-test             , p-value = 0.0060, significance = **
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0050, significance = **
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0020, significance = **
+Statistical analysis for nanos_normalized:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.1648, significance = ns
+	 24hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0003, significance = ***
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0000, significance = ***
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0000, significance = ***
+Statistical analysis for dnd_normalized_to_full_mix:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.3293, significance = ns
+	 24hpf stage:
+	 	 test-type = t-test             , p-value = 0.0060, significance = **
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0050, significance = **
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0020, significance = **
+Statistical analysis for nanos_normalized_to_full_mix:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.1648, significance = ns
+	 24hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0003, significance = ***
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0000, significance = ***
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0000, significance = ***

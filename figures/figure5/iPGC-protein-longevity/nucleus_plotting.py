@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib as mpl
+from utils import statistical_analysis, get_stars
 
 
 df = pd.read_csv(Path(__file__).parent / "data" / "nucleus.csv")
@@ -30,25 +31,49 @@ df["nanos_normalized_to_full_mix"] = df.apply(
 
 
 def plot_and_save_figures(df, swarm_plots=False):
+    stats_lines = []
+
     # plt.rcParams["text.usetex"] = True
-    mpl.rcParams["mathtext.fontset"] = "stix"
-    mpl.rcParams["font.family"] = "STIXGeneral"
     sns.set_style("ticks")
+    mpl.rcParams["mathtext.fontset"] = "stix"
+    mpl.rcParams["font.family"] = "Arial"
+    plt.rcParams.update(
+        {
+            "font.size": 6,  # default text
+            "axes.titlesize": 8,  # subplot titles
+            "axes.labelsize": 6,  # x/y axis labels
+            "xtick.labelsize": 6,  # x tick labels
+            "ytick.labelsize": 6,  # y tick labels
+            "legend.fontsize": 6,  # legend
+            "figure.titlesize": 8,  # suptitle
+        }
+    )
+    x_figure_size = 3.27  # 1 column figure size in inches for Cell Press journals
+    y_figure_size = 1.63  # 1 column figure size in inches for Cell Press journals
+    ncols = 2
+    nrows = 2
     figure_name_list = ["normalized_graphs"]
-    fig, ax = plt.subplots(2, 2, figsize=(8, 5))
+    fig, ax = plt.subplots(
+        nrows=nrows, ncols=ncols, figsize=(ncols * x_figure_size, nrows * y_figure_size)
+    )
 
     err_kws_dict = {
-        "capsize": 5,
+        "capsize": 3,
+        "elinewidth": 1,
         "marker": "D",
+        "markersize": 4,
         "mew": 1,
-        "mec": "white",
-        "barsabove": True,
+        "mec": "#69696900",
+        "barsabove": False,
     }
     line_style = ":"
     error_bar_param = "sd"
 
-    color_style_dict = {"full_mix": "#5a829e", "no_tdrd7": "#bfa35c"}
-
+    # color_style_dict = {"full_mix": "#5a829e", "no_tdrd7": "#bfa35c"}
+    color_style_dict = {
+        "full_mix": "#888888",
+        "no_tdrd7": "#7B3294",
+    }
     if swarm_plots:
         figure_name_list.append("swarm_plots")
         for ax_idx, y_col in zip(
@@ -70,8 +95,26 @@ def plot_and_save_figures(df, swarm_plots=False):
                 # palette="dark:.25",
                 palette=color_style_dict,
                 alpha=0.5,
-                size=2,
+                size=1.5,
             )
+
+            stats_lines.append(f"Statistical analysis for {ax_idx}:")
+            for stage in df["stage"].unique():
+                stats_lines.append(f"\t {stage} stage:")
+                data_set1 = (
+                    df[(df["stage"] == stage) & (df["condition"] == "no_tdrd7")][ax_idx]
+                    .dropna()
+                    .to_list()
+                )
+                data_set2 = (
+                    df[(df["stage"] == stage) & (df["condition"] == "full_mix")][ax_idx]
+                    .dropna()
+                    .to_list()
+                )
+                test_type, _, p_value = statistical_analysis(data_set1, data_set2)
+                stats_lines.append(
+                    f"\t \t test-type = {test_type}{' ' * (19 - (int(len(test_type))))}, p-value = {p_value:.4f}, significance = {get_stars(p_value)}"
+                )
 
     sns.lineplot(
         data=df,
@@ -145,6 +188,11 @@ def plot_and_save_figures(df, swarm_plots=False):
 
     fig.savefig(Path(__file__).parent / "output" / fig_name)
 
+    with open(Path(__file__).parent / "output" / "stats.txt", "w") as f:
+        print(len(stats_lines))
+        for line in stats_lines:
+            f.write(line + "\n")
+
 
 plot_and_save_figures(df, swarm_plots=True)
-plot_and_save_figures(df, swarm_plots=False)
+# plot_and_save_figures(df, swarm_plots=False)
