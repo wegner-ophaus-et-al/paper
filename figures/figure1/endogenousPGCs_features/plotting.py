@@ -237,7 +237,7 @@ def per_cell_summary(
                 zorder=5,
             )
 
-            ax[ax_idx].set_title(f"Mean", fontweight="bold")
+            ax[ax_idx].set_title("Mean", fontweight="bold")
 
     for feature, ax in zip(features_sum, axs_sum):
         for ax_idx, marker in enumerate(["gra", "dnd1"]):
@@ -284,7 +284,7 @@ def per_cell_summary(
                 zorder=5,
             )
 
-            ax[ax_idx].set_title(f"Sum", fontweight="bold")
+            ax[ax_idx].set_title("Sum", fontweight="bold")
 
     for feature, ax in zip(features_std, axs_std):
         for ax_idx, marker in enumerate(["gra", "dnd1"]):
@@ -517,7 +517,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
             subset_sum = df[(df["stage"] == stage) & (df["marker"] == marker)]
             subset_sum = (
                 subset.groupby(["uid", "condition"])[feature_columns]
-                .sum()
+                .agg("sum", numeric_only=True)
                 .reset_index()
             )
             if subset.empty:
@@ -526,12 +526,12 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
             sph_vol_mean_ctrl = float(
                 subset_sum.loc[
                     subset_sum["condition"] == "ctrl", "SphericalVolume"
-                ].mean()
+                ].median()
             )
             sph_vol_mean_kd = float(
                 subset_sum.loc[
                     subset_sum["condition"] == "kd", "SphericalVolume"
-                ].mean()
+                ].median()
             )
 
             p_value_sph_vol = np.nan
@@ -544,7 +544,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                 .tolist(),
             )
             summary_lines.append(
-                f"   SumSpherical:{' ' * second_col_start} {sph_vol_mean_kd / sph_vol_mean_ctrl:.6g}\t {p_value_sph_vol:.6g}\t {get_stars(p_value_sph_vol)}\t {stat_test_name}"
+                f"   SumSpherical:{' ' * (second_col_start - len(str('SumPherical')))} {round(sph_vol_mean_ctrl, 2)}/{round(sph_vol_mean_kd, 2)}\t {p_value_sph_vol:.6g}\t {get_stars(p_value_sph_vol)}\t {stat_test_name}"
             )
 
             fig, (ax_mean, ax_pvalue) = plt.subplots(

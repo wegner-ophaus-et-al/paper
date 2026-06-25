@@ -67,16 +67,16 @@ def main():
         df.to_pickle(data_root / "granule_features.pkl")
         # df.to_csv(data_root / "granule_features.csv")
 
-        print(data_cell)
+        # print(data_cell)
         df_cell = pd.DataFrame(data_cell)
         df_cell.to_pickle(data_root / "cell_features.pkl")
 
         if redo_feature_extraction:
             contact_sheet(cell_objects, data_root)
 
-        print("---" * 20)
-        print_nested(cell_objects[0].features, indent=2)
-        print("---" * 20)
+        # print("---" * 20)
+        # print_nested(cell_objects[0].features, indent=2)
+        # print("---" * 20)
     else:
         df = pd.read_pickle(data_root / "granule_features.pkl")
         df_cell = pd.read_pickle(data_root / "cell_features.pkl")
