@@ -18,7 +18,7 @@ df["ectopicity"] = df["Ectopic"] / df["total_number"] * 100
 nrows = 1
 ncols = 2
 
-width_ax = 1
+width_ax = 1.1
 height_ax = 1.8
 
 sns.set_style("ticks")
@@ -104,6 +104,11 @@ for ax_idx, feature in enumerate(["ectopicity", "total_number"]):
         palette="dark:black",
         zorder=5,
     )
+
+    if feature == "ectopicity":
+        ax[ax_idx].set_ylim(-1, None)
+    ax[ax_idx].set_title(feature, fontweight="bold")
+
     # Statistical Analysis
     stats_list.append(f"{feature}:\n")
     data_ctrl = df[df["condition"] == "ctrl"][feature].to_list()
@@ -119,6 +124,7 @@ for ax_idx, feature in enumerate(["ectopicity", "total_number"]):
             f"\t n KD:  {len(data_ctrl)}\n",
         ]
     )
+
 
 with open(fig_dir / "stats.txt", "w") as f:
     f.writelines(stats_list)
