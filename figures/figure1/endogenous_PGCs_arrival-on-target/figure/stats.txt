@@ -1,0 +1,12 @@
+ectopicity:
+	 Test:    Mann-Whitney U test
+	 p-Value: 0.8705015488691925
+	 stars:   ns
+	 n ctrl:  60
+	 n KD:  60
+total_number:
+	 Test:    t-test
+	 p-Value: 1.0
+	 stars:   ns
+	 n ctrl:  60
+	 n KD:  60
