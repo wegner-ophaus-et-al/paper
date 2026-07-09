@@ -5,13 +5,17 @@ sys.path.append("/Users/icb_remote/Documents/JW/py/packages/")
 
 from gamgee.instance import Marker
 import gamgee.features as features
+from gamgee.instance import ModelHandler
 import tifffile as tiff
 import numpy as np
 import re
 from datetime import datetime
 from pathlib import Path
 import scipy.ndimage as ndi
+from scipy import stats
 from skimage import measure
+
+mh = ModelHandler()
 
 
 class TheCell:
@@ -307,6 +311,7 @@ class TheCell:
             }
         )
 
+        data_collector["granule_features"]["cell_statistics"] = {}
         # Get nuclear distance features
         for marker_name in [self.granuleA, self.granuleB]:
             data_collector["granule_features"][marker_name][
@@ -317,6 +322,42 @@ class TheCell:
                     self.markers["nucleus"].segmentation,
                     self.markers["cell"].segmentation,
                 )
+            )
+
+            int_stats = {}
+            for statistic in [
+                np.sum,
+                np.mean,
+                np.std,
+            ]:
+                int_stats.update(
+                    features.intensity_statistics(
+                        statistic,
+                        self.markers[marker_name].raw_image,
+                        self.markers[marker_name].segmentation,
+                        self.markers["nucleus"].segmentation,
+                        self.markers["cell"].segmentation,
+                        normalization_image=self.markers["cell"].raw_image,
+                    )
+                )
+
+            for statistic in [
+                stats.skew,
+                stats.kurtosis,
+                features.cv,
+            ]:
+                int_stats.update(
+                    features.intensity_statistics(
+                        statistic,
+                        self.markers[marker_name].raw_image,
+                        self.markers[marker_name].segmentation,
+                        self.markers["nucleus"].segmentation,
+                        self.markers["cell"].segmentation,
+                    )
+                )
+
+            data_collector["granule_features"]["cell_statistics"].update(
+                {marker_name: int_stats}
             )
 
         # Get dnd1 and gra co-localization features
@@ -434,6 +475,12 @@ class TheCell:
         data.update(coloc)
 
         data.update(self.features["granule_features"]["granule_to_cytoplasm"])
+
+        for marker_name in [self.granuleA, self.granuleB]:
+            for k, v in self.features["granule_features"]["cell_statistics"][
+                marker_name
+            ].items():
+                data.update({f"{marker_name}_{k}": v})
 
         for key in ["cell", "nucleus"]:
             data.update(
