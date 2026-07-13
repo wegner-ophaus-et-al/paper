@@ -18,7 +18,7 @@ df["ectopicity"] = df["Ectopic"] / df["total_number"] * 100
 nrows = 1
 ncols = 2
 
-width_ax = 1.1
+width_ax = 1.2
 height_ax = 1.8
 
 sns.set_style("ticks")
@@ -79,7 +79,7 @@ for ax_idx, feature in enumerate(["ectopicity", "total_number"]):
         palette=color_palette,
         dodge=0.4,
         alpha=0.4,
-        size=2,
+        size=3,
         ax=ax[ax_idx],
         jitter=0.3,
     )
