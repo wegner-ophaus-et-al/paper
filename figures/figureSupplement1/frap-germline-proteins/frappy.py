@@ -306,15 +306,15 @@ class FrapExperiment:
 
         for sample_path in self.sample_paths:
             log_message("Loading sample...", self.logs, sample_path.name)
-            # try:
-            self.samples.append(FrapSample(sample_path))
-            self.logs.update({k: v for k, v in self.samples[-1].logs.items()})
-            log_message("Sample loaded successfully.", self.logs, sample_path.name)
-            # # except Exception as error:
-            #     log_message(
-            #         f"Failed to load sample: {error}", self.logs, sample_path.name
-            #     )
-            #
+            try:
+                self.samples.append(FrapSample(sample_path))
+                self.logs.update({k: v for k, v in self.samples[-1].logs.items()})
+                log_message("Sample loaded successfully.", self.logs, sample_path.name)
+            except Exception as error:
+                log_message(
+                    f"Failed to load sample: {error}", self.logs, sample_path.name
+                )
+
         for ts, msg in self.logs.items():
             print(f"{ts} - {msg}")
 
@@ -382,30 +382,13 @@ class FrapExperiment:
             low_limit_index=number_of_pre_bleach_frames,
             high_limit_index=index_threshold,
             model="one_phase_fixed_zero",
+            weighted=True,
+            weight_power=0.5,
         )
         if len(df_averaged["time"]) == len(self.fit_values["fitted_intensity"]):
             self.df_averaged["fitted_intensity"] = self.fit_values["fitted_intensity"]
         else:
-            print("They dont match")
-            # Where time of df_averaged < 0, set fitted intensity to nan then shift the fitted intensity so they start at the first positive time point of the averaged dataframe, then assign the shifted fitted intensity to the averaged dataframe, expect the df_averaged to be larger that the fitted intensity values since the fitted values only start at the first positive time point of the averaged dataframe, so the first part of the fitted intensity values will be nan and then the rest will be the shifted fitted intensity values
-            fit_time = self.fit_values["time"]
-            fit_intensity = self.fit_values["fitted_intensity"]
-            fit_intensity_shifted = np.full_like(df_averaged["time"], np.nan)
-            # fit_intensity_shifted[df_averaged["time"] >= fit_time[0]] =
-
-            print("Data frame / series lengths and heads:")
-            print(f"len() df_averaged time: {len(df_averaged['time'])}")
-            print(f"len() fit_time: {len(fit_time)}")
-            print("df_averaged head:")
-            print(df_averaged.head(7))
-            print(fit_intensity_shifted[:10])
-
-            if len(df_averaged["time"]) == len(fit_intensity_shifted):
-                # self.df_averaged["fitted_intensity"] = fit_intensity_shifted
-                pass
-            else:
-                print("They still dont match")
-            # TODO: Find a way to shift the fitted intensity values to match the time points of the averaged dataframe without using interpolation, maybe by finding the index of the time point in the averaged dataframe that is closest to each time point in the fitted values and assigning the fitted intensity value to that index in the averaged dataframe
+            print("They dont match, but thats ok")
 
     def generate_report(self, ax=None):
 
@@ -416,11 +399,19 @@ class FrapExperiment:
             save_plot = False
 
         df, df_averaged = self.generate_experiment_df()
-        max_time = df_averaged["time"].max()
-        next_lower_five = max_time - (max_time % 20)
+        fit_time = self.fit_values["time"]
+        max_time = fit_time.max()
+        label_time_step = 10
+        next_lower_five = max_time - (max_time % label_time_step)
         time_delta_mean = df_averaged["time_delta"].mean()
-        time_points = np.arange(0, next_lower_five, 20)
-        time_point_labels = np.round(time_points * time_delta_mean, 2)
+        time_point_labels = np.arange(
+            0, next_lower_five + label_time_step, label_time_step, dtype="int"
+        )
+        time_points = np.round(time_point_labels / time_delta_mean, 2)
+        time_point_labels_minor = np.arange(
+            0, next_lower_five + label_time_step, label_time_step / 10, dtype="int"
+        )
+        time_points_minor = np.round(time_point_labels_minor / time_delta_mean, 2)
 
         # Make lineplot with index and rename axis with averaged time values
         sns.lineplot(
@@ -443,6 +434,7 @@ class FrapExperiment:
         ax.set_title("FRAP Recovery Curves")
         ax.set_xticks(time_points)
         ax.set_xticklabels(time_point_labels)
+        ax.set_xticks(time_points_minor, minor=True)
         # ax.set_xticks(np.arange(0, next_lower_five + 5, 5))
         # ax.set_xticklabels(
         #     np.round(np.arange(0, next_lower_five + 5, 5) * time_delta_mean, 2)
