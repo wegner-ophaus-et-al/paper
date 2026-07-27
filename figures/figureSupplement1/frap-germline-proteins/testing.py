@@ -10,7 +10,8 @@ root = Path(
     "/Volumes/HELHEIM/analyzed_data/diffusivity/202207_FRAP_germ-granule_components/"
 )
 
-export_path = Path("/Users/julian/local_files/frap_test")
+export_path = Path(__file__).parent / "export"
+export_path.mkdir(exist_ok=True, parents=True)
 
 experiment_dict = {
     "gra_10hpf": root / "FRAP_gra" / "10hpf",
@@ -21,12 +22,13 @@ experiment_dict = {
 }
 
 
+# Molecular weights of eGFP fusions
 molecular_weights = {
-    "gra": 30.0,  # kDa
-    "vasa": 65.0,  # kDa
-    "vasa(AA1-164)": 18.0,  # kDa
-    "dnd": 65.0,  # kDa
-    "nanos": 38.0,  # kDa
+    "gra": 43.9,  # kDa
+    "vasa": 104.1,  # kDa
+    "vasa(AA1-164)": 26.9,  # kDa
+    "dnd": 73.6,  # kDa
+    "nanos": 45.0,  # kDa
 }
 
 palette = {
@@ -104,6 +106,20 @@ plt.tight_layout()
 sns.despine()
 fig.savefig(export_path / "frap_report.pdf")
 # plt.show()
+
+fig_rel, ax_rel = plt.subplots(figsize=(2.4, 2.4))
+for fused_name, summary in fit_summary.items():
+    protein_name = fused_name.split("_", 1)[0]
+    ax_rel.scatter(
+        molecular_weights[protein_name], summary["t_half"], color=palette[protein_name]
+    )
+ax_rel.set_box_aspect(1)
+ax_rel.set_xlabel("Molecular weight (kDa)", fontweight="bold")
+ax_rel.set_ylabel("t-half", fontweight="bold")
+ax_rel.set_title("t-half vs. MW", fontweight="bold")
+plt.tight_layout()
+sns.despine()
+fig_rel.savefig(export_path / "t_half_vs_mw.pdf")
 
 statistics = (
     df.groupby(by=["protein_name", "index"]).count()["normalized_intensity"].copy()
