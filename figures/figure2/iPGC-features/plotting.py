@@ -446,6 +446,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
         x_positions = np.arange(len(feature_columns))
         fold_changes = []
         p_values = []
+        test_types = []
         summary_lines = [f"{marker}:"]
         second_col_start = 35
         summary_lines.append(
@@ -482,20 +483,23 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
             if len(conditions) == 2:
                 if len(ctrl_values) < 2 or len(kd_values) < 2:
                     p_values.append(np.nan)
+                    test_types.append("n/a")
                 else:
-                    _, _, p_value = statistical_analysis(
+                    test_type, _, p_value = statistical_analysis(
                         ctrl_values.tolist(), kd_values.tolist()
                     )
                     p_values.append(float(p_value))
+                    test_types.append(test_type)
             else:
                 p_values.append(np.nan)
+                test_types.append("n/a")
 
             ratio_text = (
                 "nan" if np.isnan(fold_changes[-1]) else f"{fold_changes[-1]:.6g}"
             )
             p_value_text = "nan" if np.isnan(p_values[-1]) else f"{p_values[-1]:.6g}"
             summary_lines.append(
-                f"   {feature}:{' ' * (second_col_start - len(str(feature)))}{ratio_text[:5]}\t {p_value_text}\t {get_stars(p_values[-1])}"
+                f"   {feature}:{' ' * (second_col_start - len(str(feature)))}{ratio_text[:5]}\t {p_value_text}\t {get_stars(p_values[-1])}\t {test_types[-1]}"
             )
 
         fig, (ax_mean, ax_pvalue) = plt.subplots(
