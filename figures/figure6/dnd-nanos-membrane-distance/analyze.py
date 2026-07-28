@@ -6,7 +6,7 @@ from skimage.filters import gaussian
 import scipy.ndimage as ndi
 import numpy as np
 import tifffile as tiff
-from utils import select_center_object, lsm_pixel_size
+from utils import select_center_object, lsm_pixel_size, get_membrane_mask
 from filtering import segment_spots, dog_filter
 from plotlib import plot_merge, plot_image, scale_bar
 import seaborn as sns
@@ -96,6 +96,9 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         cell_seg = sm.segment(gaussian(img_mem, sigma=1.5))
 
     cell_seg = select_center_object(cell_seg)
+    membrane_mask = get_membrane_mask(cell_seg, thickness=2, pixel_size=pixel_size)
+    cytoplasm_mask = cell_seg - membrane_mask
+
     img_distance_from_membrane = ndi.distance_transform_edt(cell_seg > 0)
     img_distance_from_membrane = img_distance_from_membrane * pixel_size
 
@@ -103,6 +106,10 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     img_dfm_spots = img_distance_from_membrane.copy()
     img_dfm_spots[dnd_spots < 1] = 0
     spot_distances = img_dfm_spots[dnd_spots > 0].flatten()
+
+    # Get simple membrane over cytoplasm ratio
+    membrane_sum_intensity = np.sum(img_dnd[membrane_mask > 0])
+    cytoplasm_sum_intensity = np.sum(img_dnd[cytoplasm_mask > 0])
 
     results_dict.update(
         {
@@ -115,6 +122,10 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
             "spots_threshold": threshold_value,
             "spot_distances_mean": np.mean(spot_distances),
             "spot_distances": spot_distances,
+            "dnd_membrane_over_cytoplasm_ratio": membrane_sum_intensity
+            / (cytoplasm_sum_intensity + 10e-10),
+            "dnd_membrane_sum_distribution": membrane_sum_intensity
+            / (membrane_sum_intensity + cytoplasm_sum_intensity),
         }
     )
 
@@ -156,6 +167,7 @@ fig_contact_sheet.tight_layout()
 fig_contact_sheet.savefig(output_dir / "contact_sheet.pdf")
 plt.close(fig_contact_sheet)
 
+
 df_cell = pd.DataFrame(results)
 distances_by_condition = []
 
@@ -181,8 +193,15 @@ plt.rcParams.update(
 
 fig_kde, ax_kde = plt.subplots(figsize=(5, 3))
 sns.kdeplot(
-    data=df_dist_by_cond, x="distance", hue="condition", ax=ax_kde, common_norm=False
+    data=df_dist_by_cond,
+    x="distance",
+    hue="condition",
+    ax=ax_kde,
+    common_norm=False,
+    clip=(-0.5, 2),
+    bw_adjust=0.8,
 )
+ax_kde.set_xlim(-0.5, 2)
 ax_kde.set_xlabel("Distance from membrane (µm)")
 ax_kde.set_title("Dnd1 spot distances from membrane")
 
@@ -191,7 +210,7 @@ sns.despine()
 fig_kde.savefig(output_dir / "spot_distances_kde.pdf")
 plt.close(fig_kde)
 
-ncols = 8
+ncols = 10
 nrows = 1
 width = 1.4
 height = 2.5
@@ -210,6 +229,8 @@ for idax, feature in enumerate(
         "spots_area",
         "spots_threshold",
         "spot_distances_mean",
+        "dnd_membrane_over_cytoplasm_ratio",
+        "dnd_membrane_sum_distribution",
     ]
 ):
     sns.stripplot(
@@ -224,27 +245,29 @@ for idax, feature in enumerate(
         ax=axs[idax],
         jitter=0.2,
     )
-    # sns.pointplot(
-    #     data=df_cell,
-    #     y=feature,
-    #     hue="condition",
-    #     # hue_order=["full_mix", "no_tdrd7a"],
-    #     dodge=0.4,
-    #     ax=axs[idax],
-    #     errorbar="sd",  # standard error
-    #     estimator="median",  # or "mean"
-    #     capsize=0.075,
-    #     linestyle="none",
-    #     markersize=10,
-    #     marker="_",
-    #     err_kws=dict(linewidth=0.5, color="black"),
-    #     markeredgewidth=1,
-    #     palette="dark:black",
-    #     # zorder=5,
-    # )
+    sns.pointplot(
+        data=df_cell,
+        y=feature,
+        hue="condition",
+        # hue_order=["full_mix", "no_tdrd7a"],
+        dodge=0.8,
+        ax=axs[idax],
+        errorbar="sd",  # standard error
+        estimator="median",  # or "mean"
+        capsize=0.075,
+        linestyle="none",
+        markersize=10,
+        marker="_",
+        err_kws=dict(linewidth=0.5, color="black"),
+        markeredgewidth=1,
+        palette="dark:black",
+        # zorder=5,
+    )
 
     axs[idax].set_title(feature.replace("_", " ").title(), fontweight="bold")
     axs[idax].xaxis.label.set_fontweight("bold")
+    if not idax == 0:
+        axs[idax].legend().set_visible(False)
 
 fig_cell_features.tight_layout()
 sns.despine()

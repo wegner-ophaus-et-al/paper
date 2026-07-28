@@ -2,8 +2,10 @@ import numpy as np
 from pathlib import Path
 from PIL import Image
 import tifffile as tiff
+import scipy.ndimage as ndi
 from skimage.measure import label, regionprops
 from tifffile import TiffFile
+import matplotlib.pyplot as plt
 
 
 def lsm_pixel_size(path):
@@ -155,3 +157,12 @@ def select_center_object(segmentation):
         closest_region = regions[np.argmin(distances)]
         selected_mask = (labeled == closest_region.label).astype(int)
         return selected_mask
+
+
+def get_membrane_mask(cell_mask, thickness=2, pixel_size=1):
+    """Calculates membrane mask from cell mask as a 'Ring'"""
+    outside_dist = ndi.distance_transform_edt(cell_mask == 0) * pixel_size
+    inside_dist = ndi.distance_transform_edt(cell_mask > 0) * pixel_size
+    inside_mask = inside_dist <= (thickness / 2)
+    outside_mask = outside_dist <= (thickness / 2)
+    return (inside_mask & outside_mask).astype(int)
