@@ -1,3 +1,4 @@
+import pandas as pd
 from segmenter import SegmentationModel
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -7,7 +8,9 @@ import numpy as np
 import tifffile as tiff
 from utils import select_center_object, lsm_pixel_size
 from filtering import segment_spots, dog_filter
-from plotlib import plot_merge, plot_image
+from plotlib import plot_merge, plot_image, scale_bar
+import seaborn as sns
+
 
 recompute_masks = False
 
@@ -23,7 +26,7 @@ list_of_samples = [
 sm = SegmentationModel(path=None, model_type="vit_l_lm", upsampling_factor=1)
 
 
-contact_sheet_size = 2
+contact_sheet_size = 4
 
 fig_contact_sheet, ax_contact_sheet = plt.subplots(
     len(list_of_samples),
@@ -53,7 +56,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     elif "B008" in injected_components and "F649" in injected_components:
         condition = "tmd-n_d"
     elif "B008" in injected_components and "D378" in injected_components:
-        condition = "n-d"
+        condition = "n_d"
     else:
         raise KeyError(f"{condition_string} could not be assinged to any condition")
 
@@ -82,7 +85,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     dnd_spots, spot_number, threshold_value = segment_spots(
         img[1], sigma=sig, k=k_value
     )
-    spots_area = np.sum(dnd_spots > 0)
+    spots_area = np.sum(dnd_spots > 0) * pixel_size**2
 
     # Membrane channel
     img_mem = img[2].copy()
@@ -104,8 +107,9 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     results_dict.update(
         {
             "vasa_mean_intensity": np.mean(img_vasa),
-            "dnd_mean_intensity": np.mean(img_dnd),
             "membrane_mean_intensity": np.mean(img_mem),
+            "cell_area": np.sum(cell_seg > 0) * pixel_size**2,
+            "dnd_mean_intensity": np.mean(img_dnd),
             "spot_number": spot_number,
             "spots_area": spots_area,
             "spots_threshold": threshold_value,
@@ -114,14 +118,14 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         }
     )
 
-    # plot_merge(
-    #     {
-    #         "cyan": img_vasa,
-    #         "magenta": img_mem,
-    #         "yellow": img_dnd_filteres,
-    #     },
-    #     ax=ax,
-    # )
+    plot_merge(
+        {
+            "cyan": img_vasa,
+            "magenta": img_mem,
+            "yellow": img_dnd,
+        },
+        ax=ax[0],
+    )
     plot_image(img_vasa, ax[1], colormap="cyan")
     ax[1].contour(cell_seg, colors="white", linewidths=0.5)
     plot_image(img_mem, ax[2], colormap="magenta")
@@ -131,6 +135,9 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     ax[4].imshow(img_dnd_filteres, cmap="magma")
     ax[4].set_title(f"{uid}-{condition}")
     ax[5].imshow(img_dfm_spots, cmap="magma")
+
+    for sb_ax_idx in range(5):
+        scale_bar(ax[sb_ax_idx], length=5, thickness=1, pixel_size=pixel_size)
 
     # Write masks to file
     mask_dir = p / "masks"
@@ -143,5 +150,103 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         a.axis("off")
 
     results.append(results_dict)
+
+
 fig_contact_sheet.tight_layout()
 fig_contact_sheet.savefig(output_dir / "contact_sheet.pdf")
+plt.close(fig_contact_sheet)
+
+df_cell = pd.DataFrame(results)
+distances_by_condition = []
+
+for res in results:
+    for dist in res["spot_distances"]:
+        distances_by_condition.append({"condition": res["condition"], "distance": dist})
+df_dist_by_cond = pd.DataFrame(distances_by_condition)
+
+sns.set_style("ticks")
+plt.rcParams.update(
+    {
+        "font.family": "Arial",
+        "font.size": 6,  # default text
+        "axes.titlesize": 8,  # subplot titles
+        "axes.labelsize": 6,  # x/y axis labels
+        "axes.labelweight": "bold",  # x/y axis labels
+        "xtick.labelsize": 6,  # x tick labels
+        "ytick.labelsize": 6,  # y tick labels
+        "legend.fontsize": 6,  # legend
+        "figure.titlesize": 8,  # suptitle
+    }
+)
+
+fig_kde, ax_kde = plt.subplots(figsize=(5, 3))
+sns.kdeplot(
+    data=df_dist_by_cond, x="distance", hue="condition", ax=ax_kde, common_norm=False
+)
+ax_kde.set_xlabel("Distance from membrane (µm)")
+ax_kde.set_title("Dnd1 spot distances from membrane")
+
+fig_kde.tight_layout()
+sns.despine()
+fig_kde.savefig(output_dir / "spot_distances_kde.pdf")
+plt.close(fig_kde)
+
+ncols = 8
+nrows = 1
+width = 1.4
+height = 2.5
+
+fig_cell_features, axs = plt.subplots(
+    nrows=nrows, ncols=ncols, figsize=(ncols * width, nrows * height)
+)
+
+for idax, feature in enumerate(
+    [
+        "vasa_mean_intensity",
+        "membrane_mean_intensity",
+        "cell_area",
+        "dnd_mean_intensity",
+        "spot_number",
+        "spots_area",
+        "spots_threshold",
+        "spot_distances_mean",
+    ]
+):
+    sns.stripplot(
+        data=df_cell,
+        y=feature,
+        hue="condition",
+        # hue_order=["full_mix", "no_tdrd7a"],
+        # palette=color_palette,
+        dodge=0.4,
+        alpha=0.4,
+        size=2,
+        ax=axs[idax],
+        jitter=0.2,
+    )
+    # sns.pointplot(
+    #     data=df_cell,
+    #     y=feature,
+    #     hue="condition",
+    #     # hue_order=["full_mix", "no_tdrd7a"],
+    #     dodge=0.4,
+    #     ax=axs[idax],
+    #     errorbar="sd",  # standard error
+    #     estimator="median",  # or "mean"
+    #     capsize=0.075,
+    #     linestyle="none",
+    #     markersize=10,
+    #     marker="_",
+    #     err_kws=dict(linewidth=0.5, color="black"),
+    #     markeredgewidth=1,
+    #     palette="dark:black",
+    #     # zorder=5,
+    # )
+
+    axs[idax].set_title(feature.replace("_", " ").title(), fontweight="bold")
+    axs[idax].xaxis.label.set_fontweight("bold")
+
+fig_cell_features.tight_layout()
+sns.despine()
+fig_cell_features.savefig(output_dir / "cell_features.pdf")
+plt.close(fig_cell_features)
