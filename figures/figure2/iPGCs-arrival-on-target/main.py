@@ -31,9 +31,15 @@ def _(df_raw, pd):
         value_name="Count",
     )
     df["Region_clean"] = df["Region"].copy()
-    df.loc[df["Region_clean"] == "HighLigandArea", "Region_clean"] = "Gonad"
-    df.loc[df["Region_clean"] == "OnTarget", "Region_clean"] = "Gonad"
-    return (df,)
+    df.loc[df["Region"] == "HighLigandArea", "Region_clean"] = "OnTarget"
+    df.loc[df["Region"] == "Gonad", "Region_clean"] = "OnTarget"
+
+    # Sum Gonad + HighLigandArea counts per embryo so each embryo has exactly
+    # one "OnTarget" row, instead of two separate (un-summed) rows.
+    df_clean = df.groupby(
+        ["Date", "Condition", "EmbryoID", "Region_clean"], as_index=False
+    )["Count"].sum()
+    return df, df_clean
 
 
 @app.cell
@@ -47,12 +53,17 @@ def _():
 
 
 @app.cell
-def _(df):
+def _(df, df_clean):
     # Divide the Count by the total number of counts per EmbryoID
     df["TotalCount"] = df.groupby(["Date", "Condition", "EmbryoID"])["Count"].transform(
         "sum"
     )
     df["Percent"] = (df["Count"] / df["TotalCount"]) * 100
+
+    df_clean["TotalCount"] = df_clean.groupby(["Date", "Condition", "EmbryoID"])[
+        "Count"
+    ].transform("sum")
+    df_clean["Percent"] = (df_clean["Count"] / df_clean["TotalCount"]) * 100
     return
 
 
@@ -96,13 +107,14 @@ def _(df, palette_dict, plt, sns):
 
 
 @app.cell
-def _(df):
-    df.query("Region == 'Ectopic'")
+def _(df_clean):
+    print(df_clean["Region_clean"].unique())
+    df_clean.query("Region_clean == 'OnTarget'")
     return
 
 
 @app.cell
-def _(df, plt, sns):
+def _(df_clean, plt, sns):
     sns.set_style("ticks")
     plt.rcParams.update(
         {
@@ -126,8 +138,8 @@ def _(df, plt, sns):
     fig_paper, ax_paper = plt.subplots(1, 1, figsize=(1.35, 2))
 
     sns.stripplot(
-        data=df.query("Region == 'Ectopic'"),
-        x="Region",
+        data=df_clean.query("Region_clean == 'OnTarget'"),
+        x="Region_clean",
         y="Percent",
         hue="Condition",
         # hue_order=list(color_palette.keys()),
@@ -140,8 +152,8 @@ def _(df, plt, sns):
     )
 
     sns.pointplot(
-        data=df.query("Region == 'Ectopic'"),
-        x="Region",
+        data=df_clean.query("Region_clean == 'OnTarget'"),
+        x="Region_clean",
         y="Percent",
         hue="Condition",
         dodge=0.4,
@@ -184,8 +196,8 @@ def _(df):
 
 
 @app.cell
-def _(df):
-    df.groupby(["Condition", "Region"])["Percent"].median()
+def _(df_clean):
+    df_clean.groupby(["Condition", "Region_clean"])["Percent"].median()
     return
 
 
@@ -237,7 +249,6 @@ def _(lines):
 
 @app.cell
 def _():
-
     return
 
 
