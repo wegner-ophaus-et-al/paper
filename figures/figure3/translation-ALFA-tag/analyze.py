@@ -186,24 +186,24 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     # Measurement and statistical analysis
     nucleus_target_expression = np.mean(img_mCh[nucleus_seg > 0])
 
-    mean_alpha_cytoplasm = np.mean(img_alfatag[cytoplasm_mask > 0])
-    sum_alpha_cytoplasm = np.sum(img_alfatag[cytoplasm_mask > 0])
-    cv_alpha_cytoplasm = np.std(img_alfatag[cytoplasm_mask > 0]) / mean_alpha_cytoplasm
+    mean_alfa_cytoplasm = np.mean(img_alfatag[cytoplasm_mask > 0])
+    sum_alfa_cytoplasm = np.sum(img_alfatag[cytoplasm_mask > 0])
+    cv_alfa_cytoplasm = np.std(img_alfatag[cytoplasm_mask > 0]) / mean_alfa_cytoplasm
 
-    mean_alpha_granules = np.mean(img_alfatag[granule_seg > 0])
-    sum_alpha_granules = np.sum(img_alfatag[granule_seg > 0])
-    cv_alpha_granules = np.std(img_alfatag[granule_seg > 0]) / mean_alpha_granules
+    mean_alfa_granules = np.mean(img_alfatag[granule_seg > 0])
+    sum_alfa_granules = np.sum(img_alfatag[granule_seg > 0])
+    cv_alfa_granules = np.std(img_alfatag[granule_seg > 0]) / mean_alfa_granules
 
-    mean_alpha_granule_periphery = np.mean(img_alfatag[granule_periphery_mask > 0])
-    sum_alpha_granule_periphery = np.sum(img_alfatag[granule_periphery_mask > 0])
-    cv_alpha_granule_periphery = (
-        np.std(img_alfatag[granule_periphery_mask > 0]) / mean_alpha_granule_periphery
+    mean_alfa_granule_periphery = np.mean(img_alfatag[granule_periphery_mask > 0])
+    sum_alfa_granule_periphery = np.sum(img_alfatag[granule_periphery_mask > 0])
+    cv_alfa_granule_periphery = (
+        np.std(img_alfatag[granule_periphery_mask > 0]) / mean_alfa_granule_periphery
     )
 
     alfa_spots_labeled = label(alfa_spots)
     number_of_spots = np.max(alfa_spots_labeled)
     area_of_spots = np.sum(alfa_spots > 0)
-    sum_alpha_spots = np.sum(img_alfatag[alfa_spots > 0])
+    sum_alfa_spots = np.sum(img_alfatag[alfa_spots > 0])
 
     granule_distance_map = ndi.distance_transform_edt(granule_seg == 0) * pixel_size
     distances_to_granules = []
@@ -218,18 +218,18 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     results_dict.update(
         {
             "nucleus_target_expression": nucleus_target_expression,
-            "mean_alpha_cytoplasm": mean_alpha_cytoplasm,
-            "sum_alpha_cytoplasm": sum_alpha_cytoplasm,
-            "cv_alpha_cytoplasm": cv_alpha_cytoplasm,
-            "mean_alpha_granules": mean_alpha_granules,
-            "sum_alpha_granules": sum_alpha_granules,
-            "cv_alpha_granules": cv_alpha_granules,
-            "mean_alpha_granule_periphery": mean_alpha_granule_periphery,
-            "sum_alpha_granule_periphery": sum_alpha_granule_periphery,
-            "cv_alpha_granule_periphery": cv_alpha_granule_periphery,
+            "mean_alfa_cytoplasm": mean_alfa_cytoplasm,
+            "sum_alfa_cytoplasm": sum_alfa_cytoplasm,
+            "cv_alfa_cytoplasm": cv_alfa_cytoplasm,
+            "mean_alfa_granules": mean_alfa_granules,
+            "sum_alfa_granules": sum_alfa_granules,
+            "cv_alfa_granules": cv_alfa_granules,
+            "mean_alfa_granule_periphery": mean_alfa_granule_periphery,
+            "sum_alfa_granule_periphery": sum_alfa_granule_periphery,
+            "cv_alfa_granule_periphery": cv_alfa_granule_periphery,
             "number_of_spots": number_of_spots,
             "area_of_spots": area_of_spots,
-            "sum_alpha_spots": sum_alpha_spots,
+            "sum_intensity_alfa_spots": sum_alfa_spots,
             "mean_distance_to_granules": mean_distance_to_granules,
         }
     )
@@ -238,3 +238,149 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
 
 
 fig_contact_sheet.savefig(output_dir / "contact_sheet.pdf", bbox_inches="tight")
+
+
+df = pd.DataFrame(results)
+df["MeanRNA_Cytoplasm_Granules_Ratio"] = (
+    df["mean_alfa_cytoplasm"] / df["mean_alfa_granules"]
+)
+df["SumRNA_Cytoplasm_Granules_Ratio"] = (
+    df["sum_alfa_cytoplasm"] / df["sum_alfa_granules"]
+)
+
+
+sns.set_style("ticks")
+
+plt.rcParams.update(
+    {
+        "font.size": 6,  # default text
+        "font.family": "Arial",
+        "axes.titlesize": 8,  # subplot titles
+        "axes.labelsize": 6,  # x/y axis labels
+        "axes.labelweight": "bold",  # x/y axis labels
+        "xtick.labelsize": 6,  # x tick labels
+        "ytick.labelsize": 6,  # y tick labels
+        "legend.fontsize": 6,  # legend
+        "figure.titlesize": 8,  # suptitle
+    }
+)
+
+color_palette = {
+    "Control": "#888888",
+    "CHX": "#224644",
+    "PatA": "#566038",
+}
+
+ncols_basic = 3
+nrows_basic = 3
+width = 1.4
+height = 2.5
+
+fig_basic, ax_basic = plt.subplots(
+    nrows=nrows_basic,
+    ncols=ncols_basic,
+    figsize=(ncols_basic * width, nrows_basic * height),
+)
+for feature, ax in zip(
+    [
+        "mean_alfa_cytoplasm",
+        "sum_alfa_cytoplasm",
+        "cv_alfa_cytoplasm",
+        "mean_alfa_granules",
+        "sum_alfa_granules",
+        "cv_alfa_granules",
+        "mean_alfa_granule_periphery",
+        "sum_alfa_granule_periphery",
+        "cv_alfa_granule_periphery",
+    ],
+    ax_basic.flatten(),
+):
+    sns.stripplot(
+        data=df,
+        # x="RNAType",
+        y=feature,
+        hue="condition",
+        dodge=True,
+        palette=color_palette,
+        alpha=0.4,
+        size=3,
+        ax=ax,
+        jitter=0.3,
+    )
+    sns.pointplot(
+        data=df,
+        # x="RNAType",
+        y=feature,
+        hue="condition",
+        dodge=0.4,
+        errorbar="sd",  # standard error
+        estimator="median",  # or "mean"
+        capsize=0.075,
+        linestyle="none",
+        markersize=10,
+        marker="_",
+        err_kws=dict(linewidth=0.4, color="black"),
+        markeredgewidth=1,
+        palette="dark:black",
+        zorder=5,
+        ax=ax,
+    )
+    ax.set_title(str(feature).replace("_", " ").title(), fontweight="bold")
+    ax.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
+fig_basic.tight_layout()
+sns.despine()
+fig_basic.savefig(output_dir / "basic_features.pdf", bbox_inches="tight")
+
+
+ncols_spots = 3
+nrows_spots = 2
+
+fig_spots, ax_spots = plt.subplots(
+    nrows=nrows_spots,
+    ncols=ncols_spots,
+    figsize=(ncols_spots * width, nrows_spots * height),
+)
+for ax_2, feature in zip(
+    ax_spots.flatten(),
+    [
+        "number_of_spots",
+        "area_of_spots",
+        "sum_intensity_alfa_spots",
+        "mean_distance_to_granules",
+        "nucleus_target_expression",
+        "SumRNA_Cytoplasm_Granules_Ratio",
+    ],
+):
+    sns.stripplot(
+        data=df,
+        y=feature,
+        hue="condition",
+        dodge=True,
+        palette=color_palette,
+        alpha=0.4,
+        size=3,
+        ax=ax_2,
+        jitter=0.3,
+    )
+    sns.pointplot(
+        data=df,
+        y=feature,
+        hue="condition",
+        dodge=0.4,
+        errorbar="sd",  # standard error
+        estimator="median",  # or "mean"
+        capsize=0.075,
+        linestyle="none",
+        markersize=10,
+        marker="_",
+        err_kws=dict(linewidth=0.4, color="black"),
+        markeredgewidth=1,
+        palette="dark:black",
+        zorder=5,
+        ax=ax_2,
+    )
+    ax_2.set_title(str(feature).replace("_", " ").title(), fontweight="bold")
+    ax_2.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
+fig_spots.tight_layout()
+sns.despine()
+fig_spots.savefig(output_dir / "spots_features.pdf", bbox_inches="tight")
