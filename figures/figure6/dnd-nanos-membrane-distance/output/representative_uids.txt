@@ -1,0 +1,59 @@
+Feature: vasa_mean_intensity
+  n_d: bdc08d27, 8c18bdcc
+  tmd-n_d: 2e7f470e, 95937c45, 514b332a, d7b2b06c
+  tmd-n_stuffer: f8080632, 1d0a0cd2
+  wt: ba93b8e3, c122e5e6
+
+Feature: membrane_mean_intensity
+  n_d: 8c18bdcc, 8f8fbc27
+  tmd-n_d: 3da3a4b8, 6e6f7672, d7b2b06c, 6bd50132
+  tmd-n_stuffer: f8080632, 1d0a0cd2
+  wt: c122e5e6, 57ca8f0e
+
+Feature: cell_area
+  n_d: 8c18bdcc, 42d87c49
+  tmd-n_d: 2e7f470e, 8ce2752e, 63e74d60, 6bd50132
+  tmd-n_stuffer: 1fb30ab5, 3238fa02
+  wt: fd732878, c55dfb0a
+
+Feature: dnd_mean_intensity
+  n_d: bdc08d27, 8c18bdcc
+  tmd-n_d: 9207dde0, 63e74d60, 6bd50132, 53dd31d7
+  tmd-n_stuffer: e5628f09, 3238fa02
+  wt: ba93b8e3, c122e5e6
+
+Feature: spot_number
+  n_d: 8c18bdcc, 89dc2a7f
+  tmd-n_d: 63e74d60, d7b2b06c, 9e2a7f46, 6bd50132, 53dd31d7
+  tmd-n_stuffer: 6fa91eb8, 1fb30ab5, f8080632, 3238fa02
+  wt: 0c763c15, 57ca8f0e
+
+Feature: spots_area
+  n_d: 8c18bdcc, 89dc2a7f
+  tmd-n_d: 8ce2752e, 63e74d60, d7b2b06c, ae0ff701
+  tmd-n_stuffer: 6fa91eb8, f8080632
+  wt: 57ca8f0e, fd732878
+
+Feature: spots_threshold
+  n_d: bdc08d27, 42d87c49
+  tmd-n_d: 514b332a, 63e74d60, d7b2b06c, 6bd50132
+  tmd-n_stuffer: 5bf31b13, e5628f09
+  wt: ba93b8e3, c122e5e6
+
+Feature: spot_distances_mean
+  n_d: d7a17418, 42d87c49
+  tmd-n_d: 8ce2752e, 68ee1c21, 9f6d5e06, 53dd31d7
+  tmd-n_stuffer: 6fa91eb8, 5bf31b13, ce50c85d, 6bde0b51, 39adbdc1, 1fb30ab5, 1d0a0cd2, e5628f09
+  wt: ba93b8e3, c001051b
+
+Feature: dnd_membrane_sum_distribution_all
+  n_d: d7a17418, 8c18bdcc
+  tmd-n_d: 9207dde0, 68ee1c21, 63e74d60, ae0ff701
+  tmd-n_stuffer: 5bf31b13, 3238fa02
+  wt: c001051b, c55dfb0a
+
+Feature: dnd_membrane_sum_distribution_spots
+  n_d: d7a17418, 8c18bdcc
+  tmd-n_d: 8ce2752e, 68ee1c21, 63e74d60
+  tmd-n_stuffer: none
+  wt: ba93b8e3, 2bede677, c122e5e6, a90f65cd

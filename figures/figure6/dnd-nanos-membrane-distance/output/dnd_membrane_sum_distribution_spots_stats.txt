@@ -1,0 +1,6 @@
+Feature: dnd_membrane_sum_distribution_spots
+Groups: tmd-n_d (n=15) vs n_d (n=10)
+Test: t-test
+Statistic: 4.708790663417722
+p-value: 9.618833134126163e-05
+Significance: ***

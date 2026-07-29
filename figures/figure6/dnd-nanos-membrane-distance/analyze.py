@@ -6,13 +6,33 @@ from skimage.filters import gaussian
 import scipy.ndimage as ndi
 import numpy as np
 import tifffile as tiff
-from utils import select_center_object, lsm_pixel_size, get_membrane_mask
+from utils import (
+    select_center_object,
+    lsm_pixel_size,
+    get_membrane_mask,
+    statistical_analysis,
+    get_stars,
+)
 from filtering import segment_spots, dog_filter
 from plotlib import plot_merge, plot_image, scale_bar
+from representative_images import export_representative_uids
 import seaborn as sns
 
 
 recompute_masks = False
+
+PLOTTED_FEATURES = [
+    "vasa_mean_intensity",
+    "membrane_mean_intensity",
+    "cell_area",
+    "dnd_mean_intensity",
+    "spot_number",
+    "spots_area",
+    "spots_threshold",
+    "spot_distances_mean",
+    "dnd_membrane_sum_distribution_all",
+    "dnd_membrane_sum_distribution_spots",
+]
 
 
 root = Path("/Volumes/Kur/paper_data_sorted/tmd-nanos/2026-07-27_TMD-nanos_confo_6hpf")
@@ -96,7 +116,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         cell_seg = sm.segment(gaussian(img_mem, sigma=1.5))
 
     cell_seg = select_center_object(cell_seg)
-    membrane_mask = get_membrane_mask(cell_seg, thickness=2, pixel_size=pixel_size)
+    membrane_mask = get_membrane_mask(cell_seg, thickness=1, pixel_size=pixel_size)
     cytoplasm_mask = cell_seg - membrane_mask
 
     img_distance_from_membrane = ndi.distance_transform_edt(cell_seg > 0)
@@ -111,6 +131,12 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     membrane_sum_intensity = np.sum(img_dnd[membrane_mask > 0])
     cytoplasm_sum_intensity = np.sum(img_dnd[cytoplasm_mask > 0])
 
+    # Get membrane over cytoplasm ratio for spots
+    spots_at_membrane = (dnd_spots > 0) & membrane_mask
+    spots_at_cytoplasm = (dnd_spots > 0) & cytoplasm_mask
+    spot_membrane_sum_intensity = np.sum(img_dnd[spots_at_membrane > 0])
+    spot_cytoplasm_sum_intensity = np.sum(img_dnd[spots_at_cytoplasm > 0])
+
     results_dict.update(
         {
             "vasa_mean_intensity": np.mean(img_vasa),
@@ -122,10 +148,10 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
             "spots_threshold": threshold_value,
             "spot_distances_mean": np.mean(spot_distances),
             "spot_distances": spot_distances,
-            "dnd_membrane_over_cytoplasm_ratio": membrane_sum_intensity
-            / (cytoplasm_sum_intensity + 10e-10),
-            "dnd_membrane_sum_distribution": membrane_sum_intensity
+            "dnd_membrane_sum_distribution_all": membrane_sum_intensity
             / (membrane_sum_intensity + cytoplasm_sum_intensity),
+            "dnd_membrane_sum_distribution_spots": spot_membrane_sum_intensity
+            / (spot_membrane_sum_intensity + spot_cytoplasm_sum_intensity),
         }
     )
 
@@ -140,6 +166,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     plot_image(img_vasa, ax[1], colormap="cyan")
     ax[1].contour(cell_seg, colors="white", linewidths=0.5)
     plot_image(img_mem, ax[2], colormap="magenta")
+    ax[2].contour(membrane_mask, colors="white", linewidths=0.5, linestyles="dashed")
     plot_image(img_dnd, ax[3], colormap="yellow")
     plot_image(img_dnd_filteres, ax[4], colormap="yellow")
     ax[4].contour(dnd_spots, colors="white", linewidths=0.5)
@@ -169,11 +196,35 @@ plt.close(fig_contact_sheet)
 
 
 df_cell = pd.DataFrame(results)
+
+feature = "dnd_membrane_sum_distribution_spots"
+group_a, group_b = "tmd-n_d", "n_d"
+data_a = df_cell.loc[df_cell["condition"] == group_a, feature].dropna().tolist()
+data_b = df_cell.loc[df_cell["condition"] == group_b, feature].dropna().tolist()
+
+test_type, statistic, p_value = statistical_analysis(data_a, data_b)
+stars = get_stars(p_value)
+
+with open(output_dir / f"{feature}_stats.txt", "w") as f:
+    f.write(f"Feature: {feature}\n")
+    f.write(f"Groups: {group_a} (n={len(data_a)}) vs {group_b} (n={len(data_b)})\n")
+    f.write(f"Test: {test_type}\n")
+    f.write(f"Statistic: {statistic}\n")
+    f.write(f"p-value: {p_value}\n")
+    f.write(f"Significance: {stars}\n")
+
+export_representative_uids(
+    df_cell, PLOTTED_FEATURES, output_dir / "representative_uids.txt"
+)
+
 distances_by_condition = []
 
 for res in results:
     for dist in res["spot_distances"]:
-        distances_by_condition.append({"condition": res["condition"], "distance": dist})
+        if not dist == 0:
+            distances_by_condition.append(
+                {"condition": res["condition"], "distance": dist}
+            )
 df_dist_by_cond = pd.DataFrame(distances_by_condition)
 
 sns.set_style("ticks")
@@ -191,17 +242,27 @@ plt.rcParams.update(
     }
 )
 
-fig_kde, ax_kde = plt.subplots(figsize=(5, 3))
+color_palette = {
+    "n_d": "#888888",
+    "tmd-n_d": "#f5bb33",
+    "wt": "#4a4a4a",
+    "tmd-n_stuffer": "#c4c4c4",
+}
+
+fig_kde, ax_kde = plt.subplots(figsize=(3.6, 1.6))
 sns.kdeplot(
     data=df_dist_by_cond,
     x="distance",
     hue="condition",
     ax=ax_kde,
     common_norm=False,
-    clip=(-0.5, 2),
-    bw_adjust=0.8,
+    # clip=(-0.5, 2),
+    bw_adjust=1,
+    palette=color_palette,
+    fill=True,
+    alpha=0.7,
 )
-ax_kde.set_xlim(-0.5, 2)
+# ax_kde.set_xlim(-0.5, 2)
 ax_kde.set_xlabel("Distance from membrane (µm)")
 ax_kde.set_title("Dnd1 spot distances from membrane")
 
@@ -219,27 +280,14 @@ fig_cell_features, axs = plt.subplots(
     nrows=nrows, ncols=ncols, figsize=(ncols * width, nrows * height)
 )
 
-for idax, feature in enumerate(
-    [
-        "vasa_mean_intensity",
-        "membrane_mean_intensity",
-        "cell_area",
-        "dnd_mean_intensity",
-        "spot_number",
-        "spots_area",
-        "spots_threshold",
-        "spot_distances_mean",
-        "dnd_membrane_over_cytoplasm_ratio",
-        "dnd_membrane_sum_distribution",
-    ]
-):
+for idax, feature in enumerate(PLOTTED_FEATURES):
     sns.stripplot(
         data=df_cell,
         y=feature,
         hue="condition",
         # hue_order=["full_mix", "no_tdrd7a"],
-        # palette=color_palette,
-        dodge=0.4,
+        palette=color_palette,
+        dodge=0.6,
         alpha=0.4,
         size=2,
         ax=axs[idax],
@@ -250,7 +298,7 @@ for idax, feature in enumerate(
         y=feature,
         hue="condition",
         # hue_order=["full_mix", "no_tdrd7a"],
-        dodge=0.8,
+        dodge=0.6,
         ax=axs[idax],
         errorbar="sd",  # standard error
         estimator="median",  # or "mean"
