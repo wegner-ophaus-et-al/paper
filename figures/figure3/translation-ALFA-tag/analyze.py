@@ -3,14 +3,15 @@ from segmenter import SegmentationModel
 from pathlib import Path
 import matplotlib.pyplot as plt
 from skimage.filters import gaussian
-from skimage.measure import label
+from skimage.measure import regionprops, label
 import scipy.ndimage as ndi
 import numpy as np
 import tifffile as tiff
 from utils import (
     select_center_object,
     lsm_pixel_size,
-    get_membrane_mask,
+    get_ring_mask,
+    confine_mask_to_cell,
     statistical_analysis,
     get_stars,
 )
@@ -48,9 +49,16 @@ sm_g = None
 
 contact_sheet_size = 4
 
+###############
+sigma = 2
+k_value = 6
+safety_barrier = 1
+###############
+
+
 fig_contact_sheet, ax_contact_sheet = plt.subplots(
     len(list_of_samples),
-    6,
+    7,
     figsize=(6 * contact_sheet_size, len(list_of_samples) * contact_sheet_size * 0.9),
 )
 
@@ -107,6 +115,35 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     else:
         nucleus_seg = sm.segment(gaussian(img_alfatag, sigma=1.5))
 
+    # Delete outside cell objects
+    nucleus_seg = confine_mask_to_cell(nucleus_seg, cell_seg)
+    granule_seg = confine_mask_to_cell(granule_seg, cell_seg)
+
+    # Generate masks
+    granule_periphery_mask = get_ring_mask(
+        granule_seg, thickness=safety_barrier, pixel_size=pixel_size
+    )
+    nucleus_periphery_mask = get_ring_mask(
+        nucleus_seg, thickness=safety_barrier, pixel_size=pixel_size
+    )
+    cytoplasm_mask = (
+        cell_seg
+        - nucleus_seg
+        - granule_seg
+        - granule_periphery_mask
+        - nucleus_periphery_mask
+    )
+
+    # Generate ALFA-tag spots
+    alfa_spots, num_spots, _ = segment_spots(
+        img_alfatag, sigma=sigma, k=k_value, min_area=4, offset=0.0
+    )
+
+    # Remove spots outside the cell and inside the nucleus+safety barrier
+    alfa_spots = confine_mask_to_cell(alfa_spots, cell_seg)
+    alfa_spots = confine_mask_to_cell(alfa_spots, nucleus_seg == 0)
+    alfa_spots = confine_mask_to_cell(alfa_spots, nucleus_periphery_mask == 0)
+
     # Write masks to file
     if not recompute_masks or not (p / "masks" / "cell.tif").exists():
         mask_dir = p / "masks"
@@ -116,15 +153,16 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         tiff.imwrite(mask_dir / "nucleus.tif", nucleus_seg.astype(np.uint8))
         tiff.imwrite(mask_dir / "granule.tif", granule_seg.astype(np.uint8))
 
+    # Plotting images to contanct sheet
     plot_image(img_vasa, ax[0], colormap="cyan")
     ax[0].contour(granule_seg > 0, colors="white", linewidths=0.5)
     plot_image(img_mem, ax[1])
     ax[1].contour(cell_seg > 0, colors="white", linewidths=0.5)
     plot_image(
-        img_mCh, ax[2], colormap="magenta", vmin=0, vmax=np.percentile(img_mCh, 99.999)
+        img_mCh, ax[2], colormap="yellow", vmin=0, vmax=np.percentile(img_mCh, 99.999)
     )
     ax[2].contour(nucleus_seg > 0, colors="white", linewidths=0.5)
-    plot_image(img_alfatag, ax[3], vmin=0, vmax=np.percentile(img_alfatag, 87))
+    plot_image(img_alfatag, ax[3], vmin=0, vmax=np.percentile(img_alfatag, 95))
     plot_merge(
         {
             "cyan": img_vasa,
@@ -134,11 +172,69 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         vmins={"cyan": 0, "magenta": 0},
         vmaxs={
             "cyan": np.percentile(img_vasa, 99.999),
-            "magenta": np.percentile(img_mCh, 80),
+            "magenta": np.percentile(img_alfatag, 95),
         },
     )
+    ax[5].imshow(np.zeros(cell_seg.shape), cmap="gray")
+    ax[5].contour(cytoplasm_mask > 0, colors="#FF00FF", linewidths=0.5)
+    ax[5].contour(nucleus_seg > 0, colors="#00FFFF", linewidths=0.5)
+    ax[5].contour(granule_seg > 0, colors="#ffff00", linewidths=0.5)
+    ax[6].imshow(alfa_spots.astype("float32") * (255 / np.max(alfa_spots)), cmap="gray")
     for a in ax:
         a.axis("off")
+
+    # Measurement and statistical analysis
+    nucleus_target_expression = np.mean(img_mCh[nucleus_seg > 0])
+
+    mean_alpha_cytoplasm = np.mean(img_alfatag[cytoplasm_mask > 0])
+    sum_alpha_cytoplasm = np.sum(img_alfatag[cytoplasm_mask > 0])
+    cv_alpha_cytoplasm = np.std(img_alfatag[cytoplasm_mask > 0]) / mean_alpha_cytoplasm
+
+    mean_alpha_granules = np.mean(img_alfatag[granule_seg > 0])
+    sum_alpha_granules = np.sum(img_alfatag[granule_seg > 0])
+    cv_alpha_granules = np.std(img_alfatag[granule_seg > 0]) / mean_alpha_granules
+
+    mean_alpha_granule_periphery = np.mean(img_alfatag[granule_periphery_mask > 0])
+    sum_alpha_granule_periphery = np.sum(img_alfatag[granule_periphery_mask > 0])
+    cv_alpha_granule_periphery = (
+        np.std(img_alfatag[granule_periphery_mask > 0]) / mean_alpha_granule_periphery
+    )
+
+    alfa_spots_labeled = label(alfa_spots)
+    number_of_spots = np.max(alfa_spots_labeled)
+    area_of_spots = np.sum(alfa_spots > 0)
+    sum_alpha_spots = np.sum(img_alfatag[alfa_spots > 0])
+
+    granule_distance_map = ndi.distance_transform_edt(granule_seg == 0) * pixel_size
+    distances_to_granules = []
+    for region in regionprops(alfa_spots_labeled):
+        distances_to_granules.append(
+            granule_distance_map[tuple(np.round(region.centroid).astype(int))]
+        )
+    mean_distance_to_granules = (
+        np.mean(distances_to_granules) if distances_to_granules else np.nan
+    )
+
+    results_dict.update(
+        {
+            "nucleus_target_expression": nucleus_target_expression,
+            "mean_alpha_cytoplasm": mean_alpha_cytoplasm,
+            "sum_alpha_cytoplasm": sum_alpha_cytoplasm,
+            "cv_alpha_cytoplasm": cv_alpha_cytoplasm,
+            "mean_alpha_granules": mean_alpha_granules,
+            "sum_alpha_granules": sum_alpha_granules,
+            "cv_alpha_granules": cv_alpha_granules,
+            "mean_alpha_granule_periphery": mean_alpha_granule_periphery,
+            "sum_alpha_granule_periphery": sum_alpha_granule_periphery,
+            "cv_alpha_granule_periphery": cv_alpha_granule_periphery,
+            "number_of_spots": number_of_spots,
+            "area_of_spots": area_of_spots,
+            "sum_alpha_spots": sum_alpha_spots,
+            "mean_distance_to_granules": mean_distance_to_granules,
+        }
+    )
+
+    results.append(results_dict)
 
 
 fig_contact_sheet.savefig(output_dir / "contact_sheet.pdf", bbox_inches="tight")

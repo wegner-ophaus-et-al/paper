@@ -188,10 +188,15 @@ def select_center_object(segmentation):
         return selected_mask
 
 
-def get_membrane_mask(cell_mask, thickness=2, pixel_size=1):
+def get_ring_mask(cell_mask, thickness=2, pixel_size=1):
     """Calculates membrane mask from cell mask as a 'Ring'"""
     outside_dist = ndi.distance_transform_edt(cell_mask == 0) * pixel_size
     inside_dist = ndi.distance_transform_edt(cell_mask > 0) * pixel_size
     inside_mask = inside_dist <= (thickness / 2)
     outside_mask = outside_dist <= (thickness / 2)
     return (inside_mask & outside_mask).astype(int)
+
+
+def confine_mask_to_cell(mask, cell_mask):
+    """Confines a mask to the area defined by the cell mask."""
+    return mask * cell_mask
