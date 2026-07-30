@@ -249,6 +249,49 @@ df["SumRNA_Cytoplasm_Granules_Ratio"] = (
 )
 
 
+# Statistical analysis: Control vs PatA for every measured feature
+all_features = [
+    "nucleus_target_expression",
+    "mean_alfa_cytoplasm",
+    "sum_alfa_cytoplasm",
+    "cv_alfa_cytoplasm",
+    "mean_alfa_granules",
+    "sum_alfa_granules",
+    "cv_alfa_granules",
+    "mean_alfa_granule_periphery",
+    "sum_alfa_granule_periphery",
+    "cv_alfa_granule_periphery",
+    "number_of_spots",
+    "area_of_spots",
+    "sum_intensity_alfa_spots",
+    "mean_distance_to_granules",
+    "MeanRNA_Cytoplasm_Granules_Ratio",
+    "SumRNA_Cytoplasm_Granules_Ratio",
+]
+
+stats_results = []
+for feature in all_features:
+    control_vals = df.loc[df["condition"] == "Control", feature].dropna().to_numpy()
+    pata_vals = df.loc[df["condition"] == "PatA", feature].dropna().to_numpy()
+    test_type, statistic, p_value = statistical_analysis(control_vals, pata_vals)
+    stars = get_stars(p_value)
+    stats_results.append(
+        {
+            "feature": feature,
+            "test_type": test_type,
+            "n_control": len(control_vals),
+            "n_pata": len(pata_vals),
+            "statistic": statistic,
+            "p_value": p_value,
+            "stars": stars,
+        }
+    )
+
+stats_df = pd.DataFrame(stats_results)
+stats_df.to_csv(output_dir / "stats_results.csv", index=False)
+stars_by_feature = dict(zip(stats_df["feature"], stats_df["stars"]))
+
+
 sns.set_style("ticks")
 
 plt.rcParams.update(
@@ -325,7 +368,10 @@ for feature, ax in zip(
         zorder=5,
         ax=ax,
     )
-    ax.set_title(str(feature).replace("_", " ").title(), fontweight="bold")
+    stars = stars_by_feature.get(feature, "")
+    ax.set_title(
+        f"{str(feature).replace('_', ' ').title()} ({stars})", fontweight="bold"
+    )
     ax.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
 fig_basic.tight_layout()
 sns.despine()
@@ -379,7 +425,10 @@ for ax_2, feature in zip(
         zorder=5,
         ax=ax_2,
     )
-    ax_2.set_title(str(feature).replace("_", " ").title(), fontweight="bold")
+    stars = stars_by_feature.get(feature, "")
+    ax_2.set_title(
+        f"{str(feature).replace('_', ' ').title()} ({stars})", fontweight="bold"
+    )
     ax_2.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
 fig_spots.tight_layout()
 sns.despine()
