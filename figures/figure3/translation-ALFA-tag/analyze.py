@@ -63,6 +63,7 @@ fig_contact_sheet, ax_contact_sheet = plt.subplots(
 )
 
 results = []
+per_spot_distances = []
 for ax, p in zip(ax_contact_sheet, list_of_samples):
     results_dict = {}
 
@@ -162,7 +163,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         img_mCh, ax[2], colormap="yellow", vmin=0, vmax=np.percentile(img_mCh, 99.999)
     )
     ax[2].contour(nucleus_seg > 0, colors="white", linewidths=0.5)
-    plot_image(img_alfatag, ax[3], vmin=0, vmax=np.percentile(img_alfatag, 95))
+    plot_image(img_alfatag, ax[3], vmin=0, vmax=np.percentile(img_alfatag, 90))
     plot_merge(
         {
             "cyan": img_vasa,
@@ -172,9 +173,10 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         vmins={"cyan": 0, "magenta": 0},
         vmaxs={
             "cyan": np.percentile(img_vasa, 99.999),
-            "magenta": np.percentile(img_alfatag, 95),
+            "magenta": np.percentile(img_alfatag, 90),
         },
     )
+    ax[4].set_title(uid)
     ax[5].imshow(np.zeros(cell_seg.shape), cmap="gray")
     ax[5].contour(cytoplasm_mask > 0, colors="#FF00FF", linewidths=0.5)
     ax[5].contour(nucleus_seg > 0, colors="#00FFFF", linewidths=0.5)
@@ -211,6 +213,25 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
         distances_to_granules.append(
             granule_distance_map[tuple(np.round(region.centroid).astype(int))]
         )
+        per_spot_distances.append(
+            {
+                "uid": uid,
+                "condition": condition,
+                "spot_label": region.label,
+                "spot_centroid": region.centroid,
+                "spot_distance_to_granule": granule_distance_map[
+                    tuple(np.round(region.centroid).astype(int))
+                ],
+                "spot_intensity": np.mean(
+                    img_alfatag[alfa_spots_labeled == region.label]
+                ),
+                "spot_intensity_sum": np.sum(
+                    img_alfatag[alfa_spots_labeled == region.label]
+                ),
+                "spot_area": region.area,
+            }
+        )
+
     mean_distance_to_granules = (
         np.mean(distances_to_granules) if distances_to_granules else np.nan
     )
@@ -247,6 +268,8 @@ df["MeanRNA_Cytoplasm_Granules_Ratio"] = (
 df["SumRNA_Cytoplasm_Granules_Ratio"] = (
     df["sum_alfa_cytoplasm"] / df["sum_alfa_granules"]
 )
+
+df.to_csv(output_dir / "cell_features.csv", index=False)
 
 
 # Statistical analysis: Control vs PatA for every measured feature
@@ -316,7 +339,7 @@ color_palette = {
 
 ncols_basic = 3
 nrows_basic = 3
-width = 1.4
+width = 1.7
 height = 2.5
 
 fig_basic, ax_basic = plt.subplots(
@@ -343,12 +366,13 @@ for feature, ax in zip(
         # x="RNAType",
         y=feature,
         hue="condition",
-        dodge=True,
+        dodge=0.4,
         palette=color_palette,
-        alpha=0.4,
+        hue_order=["Control", "PatA"],
+        alpha=0.6,
         size=3,
         ax=ax,
-        jitter=0.3,
+        jitter=0.2,
     )
     sns.pointplot(
         data=df,
@@ -358,6 +382,7 @@ for feature, ax in zip(
         dodge=0.4,
         errorbar="sd",  # standard error
         estimator="median",  # or "mean"
+        hue_order=["Control", "PatA"],
         capsize=0.075,
         linestyle="none",
         markersize=10,
@@ -401,17 +426,19 @@ for ax_2, feature in zip(
         data=df,
         y=feature,
         hue="condition",
-        dodge=True,
+        hue_order=["Control", "PatA"],
+        dodge=0.4,
         palette=color_palette,
-        alpha=0.4,
+        alpha=0.6,
         size=3,
         ax=ax_2,
-        jitter=0.3,
+        jitter=0.2,
     )
     sns.pointplot(
         data=df,
         y=feature,
         hue="condition",
+        hue_order=["Control", "PatA"],
         dodge=0.4,
         errorbar="sd",  # standard error
         estimator="median",  # or "mean"
@@ -430,6 +457,40 @@ for ax_2, feature in zip(
         f"{str(feature).replace('_', ' ').title()} ({stars})", fontweight="bold"
     )
     ax_2.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
+    if feature in ["number_of_spots", "sum_intensity_alfa_spots", "area_of_spots"]:
+        ax_2.set_ylim(-5, None)
 fig_spots.tight_layout()
 sns.despine()
-fig_spots.savefig(output_dir / "spots_features.pdf", bbox_inches="tight")
+fig_spots.savefig(output_dir / "spots_features.pdf", transparent=True)
+
+
+# KDE plot of distance to granules for control
+fig_kde, ax_kde = plt.subplots(nrows=1, ncols=1, figsize=(2 * width, height / 2))
+sns.kdeplot(
+    data=df[df["condition"] == "Control"],
+    x="mean_distance_to_granules",
+    hue="condition",
+    ax=ax_kde,
+    fill=True,
+    alpha=0.5,
+    palette=color_palette,
+)
+ax_kde.set_title("KDE of Distance to Granules (Control)", fontweight="bold")
+ax_kde.set_xlabel("Mean Distance to Granules (µm)", fontweight="bold")
+
+plt.tight_layout()
+sns.despine()
+fig_kde.savefig(output_dir / "kde_distance_to_granules.pdf", transparent=True)
+
+
+df_per_spot = pd.DataFrame(per_spot_distances)
+
+g = sns.jointplot(
+    x="spot_distance_to_granule",
+    y="spot_intensity",
+    data=df_per_spot[df_per_spot["condition"] == "Control"],
+    kind="hex",
+    height=4,
+    # ax=ax_hex,
+)
+g.savefig(output_dir / "spot_intensity_vs_distance_to_granules.pdf", transparent=True)

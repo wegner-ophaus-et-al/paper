@@ -1,0 +1,318 @@
+# nucleus_target_expression
+## Control (40th-60th pct: 6137 - 1.141e+04)
+9f60d255
+8d025f4e
+c1d393c3
+d6e725e5
+9e43c992
+e531d885
+f43b8b76
+4ffb78c5
+## PatA (40th-60th pct: 9496 - 1.128e+04)
+8698dbb9
+498f23e4
+5ab596bb
+891a563a
+d7404309
+c7b8433f
+aafc4c61
+3d5c7388
+
+# mean_alfa_cytoplasm
+## Control (40th-60th pct: 946.5 - 1187)
+9f60d255
+8b3ca6e0
+c1d393c3
+dcc6d73e
+adf9d80a
+89a44708
+2146c9e8
+1f8a792a
+## PatA (40th-60th pct: 666 - 903.9)
+3ba6bce5
+c4885291
+c7b8433f
+f735056b
+d41ae0e9
+aafc4c61
+3d5c7388
+189749ee
+
+# sum_alfa_cytoplasm
+## Control (40th-60th pct: 3.754e+07 - 5.227e+07)
+9f60d255
+6a450281
+dcc6d73e
+477f1f8c
+b1431143
+89a44708
+1f8a792a
+4ffb78c5
+## PatA (40th-60th pct: 3.46e+07 - 4.449e+07)
+07784c5c
+f3d67a6b
+899a54b9
+4e1b600b
+13d8906e
+3b570b29
+aafc4c61
+189749ee
+
+# cv_alfa_cytoplasm
+## Control (40th-60th pct: 0.8185 - 0.9912)
+8b3ca6e0
+c1d393c3
+adf9d80a
+1db3344b
+f43b8b76
+1f8a792a
+4ffb78c5
+1cc42715
+## PatA (40th-60th pct: 0.788 - 0.8935)
+dd40eaf7
+d7404309
+040e747c
+c7b8433f
+f735056b
+d9c0b953
+b150c96b
+189749ee
+
+# mean_alfa_granules
+## Control (40th-60th pct: 6906 - 1.056e+04)
+d5a2fc16
+6a450281
+efc9ffa3
+a6f1117a
+25e89f74
+f82d31fb
+ce784faf
+23cf990e
+## PatA (40th-60th pct: 4468 - 8244)
+3ec3ca0c
+5ab596bb
+80c7379f
+3ba6bce5
+d9c0b953
+c0288429
+375becc1
+505ef155
+
+# sum_alfa_granules
+## Control (40th-60th pct: 5.407e+07 - 8.579e+07)
+9f60d255
+d5a2fc16
+6a450281
+efc9ffa3
+a6f1117a
+ab30d7aa
+89a44708
+f82d31fb
+## PatA (40th-60th pct: 3.601e+07 - 5.653e+07)
+d0ef20ed
+5ab596bb
+891a563a
+c7b8433f
+d9c0b953
+a1dd8afd
+375becc1
+8d36d5c8
+
+# cv_alfa_granules
+## Control (40th-60th pct: 0.8688 - 0.9799)
+cb6aec95
+e12ee4fa
+dcc6d73e
+477f1f8c
+1ac3769d
+b1431143
+b5ab8ba2
+1f8a792a
+## PatA (40th-60th pct: 0.939 - 1.132)
+13d8906e
+c4885291
+f735056b
+d9c0b953
+3b570b29
+d41ae0e9
+02e8a93d
+8d36d5c8
+
+# mean_alfa_granule_periphery
+## Control (40th-60th pct: 6399 - 1.158e+04)
+efc9ffa3
+a6f1117a
+25e89f74
+ab30d7aa
+dced989f
+f82d31fb
+ce784faf
+23cf990e
+## PatA (40th-60th pct: 6153 - 9393)
+3ec3ca0c
+498f23e4
+3ba6bce5
+d9c0b953
+c0288429
+a1dd8afd
+375becc1
+505ef155
+
+# sum_alfa_granule_periphery
+## Control (40th-60th pct: 1.728e+08 - 2.277e+08)
+9f60d255
+d5a2fc16
+efc9ffa3
+a6f1117a
+d6e725e5
+89a44708
+e531d885
+4ffb78c5
+## PatA (40th-60th pct: 1.221e+08 - 1.625e+08)
+dd40eaf7
+d0ef20ed
+5ab596bb
+c7b8433f
+d9c0b953
+c0288429
+d41ae0e9
+ec6b00e5
+
+# cv_alfa_granule_periphery
+## Control (40th-60th pct: 1.068 - 1.187)
+e12ee4fa
+dcc6d73e
+ab30d7aa
+9dcab7c9
+9e43c992
+b5ab8ba2
+ce784faf
+e9d76169
+## PatA (40th-60th pct: 0.9672 - 1.304)
+13d8906e
+c4885291
+d9c0b953
+3b570b29
+d41ae0e9
+02e8a93d
+8d36d5c8
+3d5c7388
+
+# number_of_spots
+## Control (40th-60th pct: 17 - 45.6)
+9f60d255
+6a450281
+dcc6d73e
+9e43c992
+b1431143
+89a44708
+f43b8b76
+1f8a792a
+23cf990e
+## PatA (40th-60th pct: 2 - 5.2)
+8698dbb9
+d0ef20ed
+5ab596bb
+b44e3ce6
+50e279dc
+c7b8433f
+be66d8fb
+375becc1
+aafc4c61
+
+# area_of_spots
+## Control (40th-60th pct: 359.6 - 902.2)
+cb6aec95
+8b3ca6e0
+6a450281
+dcc6d73e
+b1431143
+89a44708
+f43b8b76
+1f8a792a
+## PatA (40th-60th pct: 12.2 - 52.2)
+8698dbb9
+d0ef20ed
+b44e3ce6
+040e747c
+c7b8433f
+be66d8fb
+375becc1
+aafc4c61
+
+# sum_intensity_alfa_spots
+## Control (40th-60th pct: 1.411e+06 - 2.791e+06)
+9f60d255
+cb6aec95
+8b3ca6e0
+b1431143
+89a44708
+f43b8b76
+1f8a792a
+23cf990e
+## PatA (40th-60th pct: 2.402e+04 - 6.794e+04)
+d0ef20ed
+5ab596bb
+891a563a
+50e279dc
+c4885291
+c7b8433f
+375becc1
+aafc4c61
+
+# mean_distance_to_granules
+## Control (40th-60th pct: 1.089 - 1.272)
+9f60d255
+8d025f4e
+a6f1117a
+c1d393c3
+fdb94b69
+9e43c992
+1db3344b
+1cc42715
+## PatA (40th-60th pct: 0.529 - 1.311)
+5ab596bb
+4baf17ee
+c0288429
+a1dd8afd
+aafc4c61
+
+# MeanRNA_Cytoplasm_Granules_Ratio
+## Control (40th-60th pct: 0.108 - 0.1628)
+efc9ffa3
+d6e725e5
+477f1f8c
+0bb3aa36
+dced989f
+0af1cd56
+b5ab8ba2
+1cc42715
+## PatA (40th-60th pct: 0.112 - 0.1373)
+f3d67a6b
+80c7379f
+3ba6bce5
+a1dd8afd
+3b570b29
+375becc1
+8d36d5c8
+ec6b00e5
+
+# SumRNA_Cytoplasm_Granules_Ratio
+## Control (40th-60th pct: 0.4797 - 0.8531)
+9f60d255
+6a450281
+fdb94b69
+1db3344b
+89a44708
+0af1cd56
+2146c9e8
+1cc42715
+## PatA (40th-60th pct: 0.4207 - 1.315)
+f3d67a6b
+498f23e4
+5ab596bb
+d9c0b953
+3b570b29
+505ef155
+aafc4c61
+189749ee
