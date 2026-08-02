@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 from skimage import draw, measure
 from scipy import stats
+import tifffile as tiff
 
 
 def _cross(origin: np.ndarray, a: np.ndarray, b: np.ndarray) -> float:
@@ -162,3 +163,12 @@ def statistics(df_pivot, rna_type, ratio_desc):
         results.append(f"        stars:        {stars}")
 
     return results
+
+
+def lsm_pixel_size(path):
+    """Return pixel size in microns, asserting square pixels."""
+    with tiff.TiffFile(path) as tif:
+        m = tif.lsm_metadata
+        x, y = m["VoxelSizeX"] * 1e6, m["VoxelSizeY"] * 1e6
+    assert abs(x - y) < 1e-9, f"non-square pixels: {x} != {y}"
+    return x

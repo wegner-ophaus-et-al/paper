@@ -6,7 +6,7 @@ from skimage.filters import rank, gaussian
 from skimage import measure
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_pseudo_nucleus_mask, get_measurements
+from utils import get_pseudo_nucleus_mask, get_measurements, lsm_pixel_size
 from spots import detect_and_evaluate
 
 
@@ -18,6 +18,7 @@ class Cell:
         self.acquisition_date = None
         self.images = {}
         self.segmentations = {}
+        self.pixel_size = None
 
         self.measurements = []
         self.load_images()
@@ -25,6 +26,9 @@ class Cell:
     def load_images(self):
         img = tiff.imread(self.path / "original_raw" / f"{self.name}.lsm")
 
+        self.pixel_size = lsm_pixel_size(
+            self.path / "original_raw" / f"{self.name}.lsm"
+        )
         self.images = {"granule": img[0], "pla": img[1], self.rna_probe: img[2]}
 
     def clean_segmentations(self):
@@ -66,6 +70,7 @@ class Cell:
             sigma=sigma,
             k=k,
             min_area=min_area,
+            pixel_size=self.pixel_size,
         )
 
     def eval(self):
@@ -229,9 +234,7 @@ class Cell:
         centroids = [detail["centroid"] for detail in self.spot_details]
         if centroids:
             ys, xs = zip(*centroids)
-            ax[1].scatter(
-                xs, ys, marker="x", color="red", s=12, linewidths=0.6
-            )
+            ax[1].scatter(xs, ys, marker="x", color="red", s=12, linewidths=0.6)
         ax[1].set_title(f"Spots (n={int(self.spots.max())})")
         ax[1].axis("off")
 

@@ -12,7 +12,11 @@ from matplotlib.gridspec import GridSpec
 from tqdm import tqdm
 import pandas as pd
 from utils import calculate_area_ratio, statistics
-from spots import plot_spot_summary, plot_distance_kde
+from spots import (
+    plot_spot_summary,
+    plot_distance_kde,
+    plot_distance_vs_intensity_hex,
+)
 
 data_root = Path(__file__).parent / "data"
 
@@ -21,9 +25,9 @@ color_palette = {"DMSO": "#888888", "CHX": "#66B2DD", "PatA": "#E6A925"}
 brightness_threshold = 11000
 # brightness_threshold = np.percentile(df_int["value"], 50)
 
-spot_sigma = 1.5
-spot_k = 5.0
-spot_min_area = 4
+spot_sigma = 3
+spot_k = 7.5
+spot_min_area = 10
 
 txt_results = []
 cells = []
@@ -367,5 +371,11 @@ fig_kde.savefig(
 )
 plt.close(fig_kde)
 
+g_hex = plot_distance_vs_intensity_hex(df_spot_details)
+g_hex.savefig(
+    fig_data_path / "pla_spot_distance_to_granule_vs_intensity_hex.pdf",
+    transparent=True,
+)
+plt.close(g_hex.figure)
 with open(data_root / "statistical_results.txt", "w") as f:
     f.write("\n".join(txt_results))
