@@ -50,32 +50,52 @@ fig, ax = plt.subplots(figsize=(2, 2))
 sns.stripplot(
     data=severity_df,
     y="pct_severe_or_dead",
+    x="condition",
     hue="condition",
     # hue_order=["full_mix", "no_tdrd7a"],
-    palette=color_palette,
-    dodge=0.6,
-    alpha=0.4,
+    # palette=color_palette,
+    palette="dark:black",
+    # dodge=True,
+    alpha=0.8,
     size=2,
     ax=ax,
     jitter=0.2,
 )
-sns.pointplot(
+# sns.pointplot(
+#     data=severity_df,
+#     y="pct_severe_or_dead",
+#     hue="condition",
+#     # hue_order=["full_mix", "no_tdrd7a"],
+#     dodge=0.6,
+#     ax=ax,
+#     errorbar="sd",  # standard error
+#     estimator="mean",  # or "mean"
+#     capsize=0.075,
+#     linestyle="none",
+#     markersize=10,
+#     marker="_",
+#     err_kws=dict(linewidth=0.5, color="black"),
+#     markeredgewidth=1,
+#     palette="dark:black",
+#     # zorder=5,
+# )
+
+sns.barplot(
     data=severity_df,
     y="pct_severe_or_dead",
+    x="condition",
     hue="condition",
     # hue_order=["full_mix", "no_tdrd7a"],
-    dodge=0.6,
+    # dodge=True,
     ax=ax,
     errorbar="sd",  # standard error
     estimator="mean",  # or "mean"
     capsize=0.075,
-    linestyle="none",
-    markersize=10,
-    marker="_",
+    alpha=1,
+    linewidth=0.5,
     err_kws=dict(linewidth=0.5, color="black"),
-    markeredgewidth=1,
-    palette="dark:black",
-    # zorder=5,
+    edgecolor="black",
+    palette=color_palette,
 )
 
 ax.set_ylabel("% Severe or Dead")
@@ -86,4 +106,4 @@ ax.set_box_aspect(1)
 
 sns.despine()
 plt.tight_layout()
-fig.savefig("tmd-nanos_severity.pdf")
+fig.savefig("tmd-nanos_severity.pdf", transparent=True)
