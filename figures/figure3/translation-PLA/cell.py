@@ -7,6 +7,7 @@ from skimage import measure
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import get_pseudo_nucleus_mask, get_measurements
+from spots import detect_and_evaluate
 
 
 class Cell:
@@ -51,6 +52,20 @@ class Cell:
 
         self.segmentations["nucleo_cytoplasm"] = (
             self.segmentations["cell"].astype(bool) & ~granule_dilated
+        )
+
+    def detect_spots(self, sigma=1.5, k=5.0, min_area=4):
+        self.spots, self.spot_summary, self.spot_details = detect_and_evaluate(
+            self.images["pla"],
+            self.segmentations["cell"],
+            self.segmentations["granule"],
+            self.uid,
+            self.condition,
+            self.sample_id,
+            self.rna_probe,
+            sigma=sigma,
+            k=k,
+            min_area=min_area,
         )
 
     def eval(self):
@@ -184,6 +199,54 @@ class Cell:
         )
         ax[2].set_title(self.rna_probe, fontstyle="italic")
         ax[2].axis("off")
+
+        if not ax_provided:
+            plt.show()
+
+    def plot_spot_detection(self, ax):
+        if ax is None:
+            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+            ax_provided = False
+        else:
+            ax_provided = True
+
+        vmax = np.percentile(self.images["pla"], 99.5)
+
+        ax[0].imshow(self.images["pla"], cmap="inferno", vmin=0, vmax=vmax)
+        ax[0].set_title("PLA")
+        ax[0].axis("off")
+        ax[0].text(
+            -0.05,
+            0.5,
+            f"{self.uid}-{self.condition}",
+            transform=ax[0].transAxes,
+            rotation=90,
+            va="center",
+            ha="right",
+        )
+
+        ax[1].imshow(self.images["pla"], cmap="gray", vmin=0, vmax=vmax)
+        centroids = [detail["centroid"] for detail in self.spot_details]
+        if centroids:
+            ys, xs = zip(*centroids)
+            ax[1].scatter(
+                xs, ys, marker="x", color="red", s=12, linewidths=0.6
+            )
+        ax[1].set_title(f"Spots (n={int(self.spots.max())})")
+        ax[1].axis("off")
+
+        for a in ax:
+            a.contour(
+                self.segmentations["cell"].astype(bool),
+                colors="white",
+                linestyles="dashed",
+                linewidths=0.5,
+            )
+            a.contour(
+                self.segmentations["granule"].astype(bool),
+                colors="cyan",
+                linewidths=0.5,
+            )
 
         if not ax_provided:
             plt.show()

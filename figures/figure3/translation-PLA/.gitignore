@@ -9,3 +9,4 @@ data/contactsheet_segmentation_results.pdf
 __marimo__/session
 data/segmentation_results.pdf
 prototype.py
+filtering.py

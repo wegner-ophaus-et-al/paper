@@ -12,6 +12,7 @@ from matplotlib.gridspec import GridSpec
 from tqdm import tqdm
 import pandas as pd
 from utils import calculate_area_ratio, statistics
+from spots import plot_spot_summary, plot_distance_kde
 
 data_root = Path(__file__).parent / "data"
 
@@ -19,6 +20,10 @@ color_palette = {"DMSO": "#888888", "CHX": "#66B2DD", "PatA": "#E6A925"}
 
 brightness_threshold = 11000
 # brightness_threshold = np.percentile(df_int["value"], 50)
+
+spot_sigma = 1.5
+spot_k = 5.0
+spot_min_area = 4
 
 txt_results = []
 cells = []
@@ -46,11 +51,18 @@ fig, axes = plt.subplots(
 fig_segmentation, axes_segmentation = plt.subplots(
     nrows=len(cells), ncols=6, figsize=(width_size * 6, height_size * nrows)
 )
+fig_spots_contact, axes_spots_contact = plt.subplots(
+    nrows=len(cells), ncols=2, figsize=(width_size * 2, height_size * nrows)
+)
 
 
 data = []
+spot_cell_data = []
+spot_detail_data = []
 with tqdm(total=len(cells), desc="Processing cells") as pbar:
-    for ax, ax_seg, cell in zip(axes, axes_segmentation, cells):
+    for ax, ax_seg, ax_spots, cell in zip(
+        axes, axes_segmentation, axes_spots_contact, cells
+    ):
         cell.read_images()  # Load images from disk
         if segment_new:
             cell.segment(sm_granule)  # Uncomment this line to perform segmentation
@@ -60,7 +72,14 @@ with tqdm(total=len(cells), desc="Processing cells") as pbar:
         cell.generate_various_masks()
         cell.plot_segmentations(ax_seg)
         data.extend(cell.eval())
+        cell.detect_spots(sigma=spot_sigma, k=spot_k, min_area=spot_min_area)
+        cell.plot_spot_detection(ax_spots)
+        spot_cell_data.append(cell.spot_summary)
+        spot_detail_data.extend(cell.spot_details)
         pbar.update(1)
+
+df_spot_cells = pd.DataFrame(spot_cell_data)
+df_spot_details = pd.DataFrame(spot_detail_data)
 
 plt.tight_layout()
 fig.savefig(data_root / "contactsheet_segmentation_results.pdf", dpi=300)
@@ -68,6 +87,11 @@ plt.close(fig)
 plt.tight_layout()
 fig_segmentation.savefig(data_root / "contactsheet_generated_masks.pdf", dpi=100)
 plt.close(fig_segmentation)
+
+plt.figure(fig_spots_contact.number)
+plt.tight_layout()
+fig_spots_contact.savefig(data_root / "contactsheet_pla_spots.pdf", dpi=300)
+plt.close(fig_spots_contact)
 
 df_prime = pd.DataFrame(data)
 df_prime.to_csv(data_root / "measurements_all_cell.csv", index=False)
@@ -82,6 +106,9 @@ else:
     bright_cells = df_int[df_int["value"] > brightness_threshold]["uid"].unique()
     df = df_prime[df_prime["uid"].isin(bright_cells)].copy()
     df.to_csv(data_root / "measurements_bright_cells.csv", index=False)
+
+    df_spot_cells = df_spot_cells[df_spot_cells["uid"].isin(bright_cells)].copy()
+    df_spot_details = df_spot_details[df_spot_details["uid"].isin(bright_cells)].copy()
 
 unique_measurements = df["measurement_name"].unique()
 number_unique_measurements = len(unique_measurements)
@@ -329,6 +356,16 @@ for channel in df["image_name"].unique():
     fig_data_path = data_root / "figures"
     fig_data_path.mkdir(exist_ok=True)
     fig_data.savefig(fig_data_path / f"{channel}_measurements.pdf", transparent=True)
+
+fig_spots = plot_spot_summary(df_spot_cells, color_palette)
+fig_spots.savefig(fig_data_path / "pla_spots_summary.pdf", transparent=True)
+plt.close(fig_spots)
+
+fig_kde = plot_distance_kde(df_spot_details, color_palette)
+fig_kde.savefig(
+    fig_data_path / "pla_spot_distance_to_granule_kde.pdf", transparent=True
+)
+plt.close(fig_kde)
 
 with open(data_root / "statistical_results.txt", "w") as f:
     f.write("\n".join(txt_results))
