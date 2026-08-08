@@ -1,0 +1,8 @@
+Statistical test: t-test
+Full mix median: 80.54
+DndNos median: 77.18
+Full mix mean: 81.71
+DndNos mean: 77.81
+Full mix count: 40
+DndNos count: 40
+p-value: 0.0312	*

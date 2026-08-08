@@ -2,6 +2,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
+from utils import statistical_analysis, get_stars
+from scipy import stats
 
 df = pd.read_csv(
     "/Users/julian/Library/Mobile Documents/com~apple~CloudDocs/Documents/General Science/Programming/py/general_analysis/20260807_nanos_dnd/iPGC_localization_24hpf_FullmixvsDndNos.csv"
@@ -34,7 +36,7 @@ sns.stripplot(
     y="OnTarget",
     x="Condition",
     hue="Condition",
-    alpha=0.4,
+    alpha=0.6,
     size=3,
     ax=ax,
 )
@@ -63,3 +65,19 @@ sns.despine()
 plt.tight_layout()
 plt.show()
 fig.savefig("dnd-nos_induced-iPGCs_ectopicity.pdf", transparent=True)
+
+
+fm_data = df[df["Condition"] == "Full mix"]["OnTarget"]
+dn_data = df[df["Condition"] == "DndNos"]["OnTarget"]
+ttype, _, p_value = statistical_analysis(fm_data, dn_data)
+
+
+with open("iPGC_dnd_nanos_ectopicity_stats.txt", "w") as f:
+    f.write(f"Statistical test: {ttype}\n")
+    f.write(f"Full mix median: {round(fm_data.median(), 2)}\n")
+    f.write(f"DndNos median: {round(dn_data.median(), 2)}\n")
+    f.write(f"Full mix mean: {round(fm_data.mean(), 2)}\n")
+    f.write(f"DndNos mean: {round(dn_data.mean(), 2)}\n")
+    f.write(f"Full mix count: {len(fm_data)}\n")
+    f.write(f"DndNos count: {len(dn_data)}\n")
+    f.write(f"p-value: {round(p_value, 4)}\t{get_stars(p_value)}\n")
