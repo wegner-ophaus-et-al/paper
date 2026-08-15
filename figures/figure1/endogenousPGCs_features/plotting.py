@@ -516,11 +516,11 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                 )
             subset_sum = df[(df["stage"] == stage) & (df["marker"] == marker)]
             subset_sum = (
-                subset.groupby(["uid", "condition"])[feature_columns]
+                subset_sum.groupby(["uid", "condition"])[feature_columns]
                 .agg("sum", numeric_only=True)
                 .reset_index()
             )
-            if subset.empty:
+            if subset_sum.empty:
                 continue
 
             sph_vol_mean_ctrl = float(
@@ -533,6 +533,11 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                     subset_sum["condition"] == "kd", "SphericalVolume"
                 ].median()
             )
+            sph_vol_ratio = (
+                abs(sph_vol_mean_kd / sph_vol_mean_ctrl)
+                if sph_vol_mean_ctrl != 0
+                else np.nan
+            )
 
             p_value_sph_vol = np.nan
             stat_test_name, _, p_value_sph_vol = statistical_analysis(
@@ -544,7 +549,7 @@ def plot_foldchange(df, save_dir: Path, color_palette="Set2"):
                 .tolist(),
             )
             summary_lines.append(
-                f"   SumSpherical:{' ' * (second_col_start - len(str('SumPherical')))} {round(sph_vol_mean_ctrl, 2)}/{round(sph_vol_mean_kd, 2)}\t {p_value_sph_vol:.6g}\t {get_stars(p_value_sph_vol)}\t {stat_test_name}"
+                f"   SumSpherical:{' ' * (second_col_start - len(str('SumPherical')))} {sph_vol_ratio:.6g} (ctrl={round(sph_vol_mean_ctrl, 2)}/kd={round(sph_vol_mean_kd, 2)})\t {p_value_sph_vol:.6g}\t {get_stars(p_value_sph_vol)}\t {stat_test_name}"
             )
 
             fig, (ax_mean, ax_pvalue) = plt.subplots(
