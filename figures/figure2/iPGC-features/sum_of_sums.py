@@ -183,7 +183,8 @@ def main():
                 test_name, _, p_value = statistical_analysis(fm_values, nt_values)
                 star_significance = get_stars(p_value)
                 printed_p_val = (
-                    str(round(p_value, 4)) if p_value >= 0.0001 else "<0.0001"
+                    # str(round(p_value, 4)) if p_value >= 0.0001 else "<0.0001"
+                    p_value
                 )
                 stat_outpuit_lines.append(
                     f"{feature_name}:{(30 - len(feature_name)) * ' '}{printed_p_val}\t{star_significance}\t{test_name}\n"

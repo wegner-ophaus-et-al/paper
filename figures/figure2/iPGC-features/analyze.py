@@ -20,7 +20,7 @@ data_root = Path(
 )
 
 only_data_processing = False
-redo_feature_extraction = False
+redo_feature_extraction = True
 
 
 def process_cell(args):
