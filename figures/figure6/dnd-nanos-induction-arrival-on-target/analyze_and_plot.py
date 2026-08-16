@@ -15,7 +15,7 @@ print(df.head())
 
 palette = {"Full mix": "#888888", "DndNos": "#FFCD22"}
 
-sns.set_theme(style="ticks")
+sns.set_style("ticks")
 plt.rcParams.update(
     {
         "font.family": "Arial",
@@ -29,7 +29,7 @@ plt.rcParams.update(
         "figure.titlesize": 8,  # suptitle
     }
 )
-fig, ax = plt.subplots(figsize=(1.6, 2.3))
+fig, ax = plt.subplots(figsize=(1.35, 2.2))
 
 sns.stripplot(
     data=df,
@@ -38,6 +38,8 @@ sns.stripplot(
     hue="Condition",
     alpha=0.6,
     size=3,
+    jitter=0.15,
+    palette=palette,
     ax=ax,
 )
 sns.pointplot(
@@ -60,10 +62,11 @@ sns.pointplot(
 )
 
 ax.set_ylim(50, 105)
-ax.set_title("On target Dnd1 + Nanos3 induced PGCs")
+ax.set_title("On target Dnd1 + Nanos3 induced PGCs", fontweight="bold")
 sns.despine()
 plt.tight_layout()
-plt.show()
+plt.xticks(rotation=45)
+# plt.show()
 fig.savefig("dnd-nos_induced-iPGCs_ectopicity.pdf", transparent=True)
 
 
