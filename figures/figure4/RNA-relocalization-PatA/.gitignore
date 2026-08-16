@@ -8,3 +8,6 @@ proto/output
 proto/.DS_Store
 segmentations/.DS_Store
 .DS_Store
+__marimo__/session
+anaconda_projects/db
+proto/.ipynb_checkpoints
