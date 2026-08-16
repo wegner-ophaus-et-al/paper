@@ -5,9 +5,7 @@ from pathlib import Path
 from utils import statistical_analysis, get_stars
 from scipy import stats
 
-df = pd.read_csv(
-    "/Users/julian/Library/Mobile Documents/com~apple~CloudDocs/Documents/General Science/Programming/py/general_analysis/20260807_nanos_dnd/iPGC_localization_24hpf_FullmixvsDndNos.csv"
-)
+df = pd.read_csv(Path(__file__).parent / "iPGC_localization_24hpf_FullmixvsDndNos.csv")
 df["OnTarget"] = (
     (df["Gonad"] + df["LigandHigh"]) / (df["Ectopic"] + df["LigandHigh"] + df["Gonad"])
 ) * 100
