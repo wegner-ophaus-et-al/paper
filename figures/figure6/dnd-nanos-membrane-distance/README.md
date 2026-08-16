@@ -20,7 +20,6 @@ The raw microscopy data is not included in this repository and is not yet public
 
 ## How to run
 
-No environment/dependency file is present in this repo (no `requirements.txt`/`environment.yml`). The code imports `pandas`, `numpy`, `matplotlib`, `seaborn`, `scipy`, `scikit-image`, `tifffile`, `Pillow`, `micro_sam`, and `torch` (with optional `psutil` for memory checks on Apple Silicon); set up an environment with these yourself.
 
 1. Edit the `root` path at the top of `analyze.py` to point at your local copy of the sorted data folder.
 2. Run:
@@ -51,3 +50,6 @@ No environment/dependency file is present in this repo (no `requirements.txt`/`e
 - `utils.py` — statistics (normality check, t-test/Mann-Whitney selection, significance stars), `.lsm` pixel-size reading, image normalization, and mask utilities (membrane-ring extraction, center-object selection).
 - `representative_images.py` — selects per-condition, per-feature "typical" sample UIDs for figure selection.
 - `curate_cell_masks.ijm` — Fiji macro for blinded manual review/correction of cell masks.
+
+***
+This README has been created with claude code and revised by JW
