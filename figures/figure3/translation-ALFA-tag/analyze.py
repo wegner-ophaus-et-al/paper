@@ -206,6 +206,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
     number_of_spots = np.max(alfa_spots_labeled)
     area_of_spots = np.sum(alfa_spots > 0)
     sum_alfa_spots = np.sum(img_alfatag[alfa_spots > 0])
+    mean_alfa_spots = np.mean(img_alfatag[alfa_spots > 0])
 
     granule_distance_map = ndi.distance_transform_edt(granule_seg == 0) * pixel_size
     distances_to_granules = []
@@ -251,6 +252,7 @@ for ax, p in zip(ax_contact_sheet, list_of_samples):
             "number_of_spots": number_of_spots,
             "area_of_spots": area_of_spots,
             "sum_intensity_alfa_spots": sum_alfa_spots,
+            "mean_intensity_alfa_spots": mean_alfa_spots,
             "mean_distance_to_granules": mean_distance_to_granules,
         }
     )
@@ -339,8 +341,8 @@ color_palette = {
 
 ncols_basic = 3
 nrows_basic = 3
-width = 1.7
-height = 2.5
+width = 1.2
+height = 1.8
 
 fig_basic, ax_basic = plt.subplots(
     nrows=nrows_basic,
@@ -417,6 +419,7 @@ for ax_2, feature in zip(
         "number_of_spots",
         "area_of_spots",
         "sum_intensity_alfa_spots",
+        "mean_intensity_alfa_spots",
         "mean_distance_to_granules",
         "nucleus_target_expression",
         "SumRNA_Cytoplasm_Granules_Ratio",
@@ -458,16 +461,20 @@ for ax_2, feature in zip(
     )
     ax_2.set_ylabel(str(feature).replace("_", " "), fontweight="bold")
     if feature in ["number_of_spots", "sum_intensity_alfa_spots", "area_of_spots"]:
-        ax_2.set_ylim(-5, None)
+        pass
+        # ax_2.set_ylim(-5, None)
 fig_spots.tight_layout()
 sns.despine()
 fig_spots.savefig(output_dir / "spots_features.pdf", transparent=True)
 
 
 # KDE plot of distance to granules for control
-fig_kde, ax_kde = plt.subplots(nrows=1, ncols=1, figsize=(2 * width, height / 2))
+control = df[df["condition"] == "Control"]
+vals = control["mean_distance_to_granules"].dropna()
+
+fig_kde, ax_kde = plt.subplots(nrows=1, ncols=1, figsize=(1.5 * width, height))
 sns.kdeplot(
-    data=df[df["condition"] == "Control"],
+    data=control,
     x="mean_distance_to_granules",
     hue="condition",
     ax=ax_kde,
@@ -475,10 +482,19 @@ sns.kdeplot(
     alpha=0.5,
     palette=color_palette,
 )
-ax_kde.set_title("KDE of Distance to Granules (Control)", fontweight="bold")
-ax_kde.set_xlabel("Mean Distance to Granules (µm)", fontweight="bold")
 
-plt.tight_layout()
+ax_kde.axvline(
+    vals.mean(), color="k", ls="--", lw=1.2, label=f"Mean = {vals.mean():.2f}"
+)
+ax_kde.axvline(
+    vals.median(), color="k", ls=":", lw=1.2, label=f"Median = {vals.median():.2f}"
+)
+
+ax_kde.set_xlabel("Mean Distance to Granules (µm)", fontweight="bold")
+ax_kde.set_title("KDE of Distance to Granules (Control)", fontweight="bold")
+ax_kde.legend()
+
+fig_kde.tight_layout()
 sns.despine()
 fig_kde.savefig(output_dir / "kde_distance_to_granules.pdf", transparent=True)
 
