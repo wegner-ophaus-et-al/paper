@@ -9,3 +9,5 @@ gen
 
 # macOS system files
 .DS_Store
+__marimo__/session
+__pycache__/utils.cpython-312.pyc
