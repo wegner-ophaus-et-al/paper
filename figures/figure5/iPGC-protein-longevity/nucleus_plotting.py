@@ -30,6 +30,13 @@ df["nanos_normalized_to_full_mix"] = df.apply(
 )
 
 
+def format_p_value(p_value):
+    if p_value < 0.0001:
+        mantissa, exponent = f"{p_value:.2e}".split("e")
+        return f"{mantissa}e{int(exponent)}"
+    return f"{p_value:.4f}"
+
+
 def plot_and_save_figures(df, swarm_plots=False):
     stats_lines = []
 
@@ -91,11 +98,13 @@ def plot_and_save_figures(df, swarm_plots=False):
                 y=ax_idx,
                 ax=y_col,
                 hue="condition",
-                # dodge=True,
-                # palette="dark:.25",
                 palette=color_style_dict,
-                alpha=0.5,
-                size=1.5,
+                marker="o",
+                jitter=0.12,
+                linewidth=0.3,
+                edgecolor="#050505",
+                alpha=0.3,
+                size=2.25,
             )
 
             stats_lines.append(f"Statistical analysis for {ax_idx}:")
@@ -113,7 +122,7 @@ def plot_and_save_figures(df, swarm_plots=False):
                 )
                 test_type, _, p_value = statistical_analysis(data_set1, data_set2)
                 stats_lines.append(
-                    f"\t \t test-type = {test_type}{' ' * (19 - (int(len(test_type))))}, p-value = {p_value:.4f}, significance = {get_stars(p_value)}"
+                    f"\t \t test-type = {test_type}{' ' * (19 - (int(len(test_type))))}, p-value = {format_p_value(p_value)}, significance = {get_stars(p_value)}, n(no_tdrd7) = {len(data_set1)}, n(full_mix) = {len(data_set2)}"
                 )
 
     sns.lineplot(
