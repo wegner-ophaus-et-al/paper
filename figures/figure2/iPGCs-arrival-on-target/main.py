@@ -128,7 +128,7 @@ def _(df_clean, plt, sns):
         }
     )
     plt.rcParams["font.family"] = "Arial"
-
+'/Users/julian/Documents/General Science/Programming/py/general_analysis/20250507_iPGCs_tdrd7a_ectopicity'
     color_palette = {
         "with Tdrd7a": "#888888",
         "without Tdrd7a": "#7B3294",
@@ -172,8 +172,8 @@ def _(df_clean, plt, sns):
     ax_paper.set_xlabel("")
     ax_paper.set_xticks([])
     ax_paper.set_xticklabels([])
-    ax_paper.set_ylabel("Ectopic iPGCs [%]", fontweight="bold")
-    ax_paper.set_title("Ectopic iPGCs at 24 hpf", fontweight="bold")
+    ax_paper.set_ylabel("iPGCs on target [%]", fontweight="bold")
+    ax_paper.set_title("On target iPGCs at 24 hpf", fontweight="bold")
     ax_paper.legend_.remove()
     plt.tight_layout()
     sns.despine()
