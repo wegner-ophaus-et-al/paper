@@ -14,19 +14,20 @@ df = pd.read_csv(root / "Tdrd7a_ectopicity.csv")
 
 df["total_number"] = df["Gonad"] + df["Ectopic"]
 df["ectopicity"] = df["Ectopic"] / df["total_number"] * 100
+df["on_target"] = df["Gonad"] / df["total_number"] * 100
 
 nrows = 1
 ncols = 2
 
 width_ax = 1.2
-height_ax = 1.8
+height_ax = 1.9
 
 sns.set_style("ticks")
 
 plt.rcParams.update(
     {
-        "font.size": 6,  # default text
         "font.family": "Arial",
+        "font.size": 6,  # default text
         "axes.titlesize": 8,  # subplot titles
         "axes.labelsize": 6,  # x/y axis labels
         "xtick.labelsize": 6,  # x tick labels
@@ -40,12 +41,12 @@ fig, ax = plt.subplots(
     ncols=ncols, nrows=nrows, figsize=(ncols * width_ax, nrows * height_ax)
 )
 color_palette = {
-    "ctrl": "#878787",
+    "ctrl": "#888888",
     "kd": "#7B3294",
 }
 
 stats_list = []
-for ax_idx, feature in enumerate(["ectopicity", "total_number"]):
+for ax_idx, feature in enumerate(["on_target", "total_number"]):
     # sns.stripplot(
     #    data=df,
     #    y=feature,
@@ -105,8 +106,9 @@ for ax_idx, feature in enumerate(["ectopicity", "total_number"]):
         zorder=5,
     )
 
-    if feature == "ectopicity":
-        ax[ax_idx].set_ylim(-1, None)
+    ax[ax_idx].set_xlabel(feature, fontweight="bold")
+    if feature == "on_target":
+        ax[ax_idx].set_ylim(None, 101)
     ax[ax_idx].set_title(feature, fontweight="bold")
 
     # Statistical Analysis
