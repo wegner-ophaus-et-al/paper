@@ -633,6 +633,7 @@ fig_paper.savefig("output/quantification_paper.pdf")
 
 plt.rcParams.update(
     {
+        "font.family": "Arial",
         "font.size": 6,  # default text
         "axes.titlesize": 8,  # subplot titles
         "axes.labelsize": 6,  # x/y axis labels
@@ -643,14 +644,12 @@ plt.rcParams.update(
     }
 )
 
-plt.rcParams["font.family"] = "Arial"
-
 color_palette2 = {
     "DMSO Control": "#888888",
-    "CHX Treated": "#66B2DD",
-    "PatA": "#E6A925",
+    "CHX Treated": "#224644",
+    "PatA": "#566038",
 }
-fig_paper_newstyle, ax_paper_newstyle = plt.subplots(1, 1, figsize=(1.63, 2.5))
+fig_paper_newstyle, ax_paper_newstyle = plt.subplots(1, 1, figsize=(1.63, 3))
 
 sns.stripplot(
     data=df,
@@ -682,6 +681,14 @@ sns.pointplot(
     zorder=5,
     ax=ax_paper_newstyle,
 )
+ax_paper_newstyle.set_title("mRNA relocalization - CHX", fontweight="bold")
+ax_paper_newstyle.set_ylabel(
+    r"Mean Intensity Ratio (Cytoplasm/Granule)", fontweight="bold"
+)
+ax_paper_newstyle.set_xticklabels(
+    ax_paper_newstyle.get_xticklabels(), fontstyle="italic"
+)
+ax_paper_newstyle.set_xlabel("")
 plt.tight_layout()
 sns.despine()
 fig_paper_newstyle.savefig(
