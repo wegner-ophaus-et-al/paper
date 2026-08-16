@@ -165,6 +165,37 @@ def statistics(df_pivot, rna_type, ratio_desc):
     return results
 
 
+def compare_conditions(df, value_col, group_col="condition", control="DMSO", drugs=("CHX", "PatA")):
+    """Compare each drug condition against control for a numeric column.
+
+    Returns a list of result dicts, one per drug, using the same
+    normality-gated t-test/Mann-Whitney logic as `statistics()`.
+    """
+    rows = []
+    for drug in drugs:
+        ctrl_vals = df[df[group_col] == control][value_col].to_list()
+        drug_vals = df[df[group_col] == drug][value_col].to_list()
+        if not ctrl_vals or not drug_vals:
+            continue
+
+        test_name, statistic, p_value = statistical_analysis(ctrl_vals, drug_vals)
+        rows.append(
+            {
+                "group1": control,
+                "group1_mean": np.mean(ctrl_vals),
+                "group1_n": len(ctrl_vals),
+                "group2": drug,
+                "group2_mean": np.mean(drug_vals),
+                "group2_n": len(drug_vals),
+                "test": test_name,
+                "statistic": statistic,
+                "p_value": p_value,
+                "stars": get_stars(p_value),
+            }
+        )
+    return rows
+
+
 def lsm_pixel_size(path):
     """Return pixel size in microns, asserting square pixels."""
     with tiff.TiffFile(path) as tif:

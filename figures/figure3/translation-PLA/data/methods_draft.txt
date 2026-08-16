@@ -1,0 +1,147 @@
+METHODS — DRAFT
+(STAR★Methods-style; fill in bracketed placeholders and verify reagent/
+software citations before submission. Scoped to what supports the two
+figures already drafted: pla_spots_summary_vasa.pdf and
+pla_spot_distance_to_granule_kde.pdf.)
+
+
+Zebrafish husbandry and drug treatment
+----------------------------------------------------------------------
+Zebrafish (Danio rerio) embryos were raised and staged according to
+standard protocols [CITE husbandry protocol / IACUC-equivalent approval
+number]. At [X hpf, prior to the analyzed 9 hpf timepoint / describe
+staging], embryos were treated with either 0.1% DMSO (vehicle control),
+### µM pateamine A (PatA), or ### µg/mL cycloheximide (CHX) for X h,
+then fixed at 9 hours post-fertilization (hpf) in [fixative, e.g. 4%
+paraformaldehyde] for [duration/temperature].
+
+[PLACEHOLDER — confirm: PatA and CHX are both translation inhibitors;
+PatA blocks translation initiation (eIF4A inhibitor) and CHX blocks
+elongation by stalling ribosomes on mRNA. State mechanism explicitly if
+relevant to interpretation.]
+
+
+Proximity ligation assay (PLA), immunofluorescence, and RNAscope
+----------------------------------------------------------------------
+Active translation of vasa mRNA was visualized using an in situ
+proximity ligation assay (Duolink PLA, Sigma-Aldrich [CITE kit/cat.
+no.]) between [PRIMARY ANTIBODY 1 — anti-Vasa, host species, clone/cat.
+no.] and [PRIMARY ANTIBODY 2 — anti-ribosomal subunit, host species,
+clone/cat. no., and which subunit/epitope, e.g. a large-subunit protein
+near the polypeptide exit tunnel]. A PLA punctum is generated only when
+the two antibody-bound epitopes are within ~40 nm of each other,
+reporting sites where a ribosome is in the process of, or has just
+finished, synthesizing nascent Vasa protein — i.e., a marker for active
+vasa translation.
+
+Germ granules were independently visualized by immunofluorescence
+against [GRANULE MARKER ANTIBODY — target protein, host species,
+clone/cat. no.] on the same samples ("granule" channel).
+
+Samples were additionally processed for single-molecule RNAscope in
+situ hybridization (Advanced Cell Diagnostics [CITE assay/probe cat.
+no.]) against either vasa mRNA or actin mRNA (a non-germ-granule-
+enriched control transcript), one probe per sample, recorded as the
+third imaging channel.
+
+[PLACEHOLDER — confirm order of operations: PLA performed first,
+followed by RNAscope on the same fixed samples ("RNAscope after PLA"
+per raw data folder naming), and confirm compatibility/any decrosslinking
+step between the two protocols.]
+
+
+Image acquisition
+----------------------------------------------------------------------
+Confocal image stacks were acquired as three-channel LSM files
+(channel 1: germ granule marker; channel 2: PLA; channel 3: RNAscope
+probe [vasa or actin]) on a [MICROSCOPE MODEL / objective / NA
+placeholder]. Pixel size (µm) was read per image from the LSM file's
+VoxelSizeX/VoxelSizeY metadata (isotropic pixels were verified for each
+image).
+
+
+Image analysis and quantification
+----------------------------------------------------------------------
+All image analysis was performed with a custom Python pipeline (NumPy,
+SciPy, scikit-image, pandas, seaborn/matplotlib; code available at
+[REPOSITORY URL/placeholder]).
+
+Cell segmentation: For each image, the germ-granule-marker channel was
+smoothed with a Gaussian filter (σ = 3 px) and thresholded at the 45th
+intensity percentile to define a whole-cell mask, followed by binary
+morphological opening and hole-filling.
+
+Germ granule segmentation: Germ granules were segmented from the
+granule-marker channel using a machine-learning instance segmentation
+model [Segment Anything Model (SAM)-based model, fine-tuned for germ
+granules — CITE model/checkpoint if this will be named publicly, or
+generalize to "a pretrained SAM-based segmentation model (vit_l
+backbone)"], restricted to pixels within the cell mask, and relabeled as
+individual connected components.
+
+Cell inclusion / quality control: Only cells with detectable germ-
+granule-marker signal were retained for quantification, defined as mean
+granule-channel pixel intensity within the segmented granule mask
+> 9,000 a.u. This excluded cells with insufficient/failed granule
+immunostaining. Of [155] total imaged cells, [102] passed this criterion
+(vasa probe: DMSO n = 21, PatA n = 15, CHX n = 18 cells; actin probe:
+DMSO n = 24, CHX n = 15, PatA n = 9 cells).
+
+PLA punctum detection: Within the cell mask, the PLA channel was
+filtered with a difference-of-Gaussians filter (σ = 3 px, outer/inner
+ratio 1.6) to enhance punctate structures. A robust intensity threshold
+was computed per image as background + k × robust SD, where background
+is the image median and robust SD = 1.4826 × median absolute deviation
+(MAD) of pixel intensities; k = 7.5. Pixels above threshold were
+binarized, small objects below 10 px were removed, and remaining objects
+were labeled as individual PLA puncta by connected-component analysis.
+For each cell, the number of PLA puncta and the mean raw PLA pixel
+intensity across all punctum pixels were recorded as per-cell summary
+statistics.
+
+Distance to nearest germ granule: For each detected PLA punctum, the
+distance from its centroid to the nearest germ-granule mask boundary was
+computed via a Euclidean distance transform and converted to micrometers
+using the image's pixel size. This distance is unsigned (≥ 0 µm) and
+does not distinguish puncta lying just outside a granule from puncta
+embedded within one at the same distance from the boundary; puncta
+directly on the boundary have a distance of 0 µm. [Note for internal
+use, not for the manuscript: kernel density plots of this measure can
+show an apparent tail below 0 µm — this is a Gaussian kernel-smoothing
+display artifact of unbounded seaborn KDE, not a real negative value in
+the underlying data, and should be clarified in the figure legend rather
+than restated here.]
+
+
+Quantification and statistical analysis
+----------------------------------------------------------------------
+Data are presented as individual cells (or individual PLA puncta, for
+the distance-to-granule analysis) with mean ± SD (spots-per-cell and
+spot-intensity panels) or mean and median (distance-to-granule KDE
+panels) indicated. [As currently implemented, no formal statistical
+test (e.g., Kruskal-Wallis with post-hoc pairwise comparisons) has been
+computed for the number-of-puncta-per-cell or mean-puncta-intensity
+comparisons across DMSO/PatA/CHX — add one before submission if a
+significance claim is being made in the text.] For other channel-
+intensity ratio measurements (not part of the two figures drafted here),
+group comparisons used two-sided Student's t-tests when both groups
+passed a D'Agostino-Pearson normality test (p > 0.05), and two-sided
+Mann-Whitney U tests otherwise.
+
+
+REMAINING PLACEHOLDERS TO FILL IN
+----------------------------------------------------------------------
+- PatA / CHX concentrations, treatment start time (relative to hpf), and
+  duration.
+- Fixation reagent/duration/temperature.
+- Antibody details for the PLA target pair (anti-Vasa and
+  anti-ribosomal-subunit) and the granule-marker antibody: host species,
+  clone, catalog number, dilution.
+- RNAscope probe catalog numbers/lot.
+- Confocal microscope model, objective/NA, and any additional acquisition
+  settings (laser lines, pinhole, z-step if stacks are projected).
+- IACUC/ethics approval number for zebrafish work.
+- Whether/how the SAM-based granule segmentation model should be named,
+  cited, or described generically for publication.
+- Total imaged vs. bright-cell-passing counts should be double-checked
+  against the final dataset before quoting n = 155 / n = 102 in print.

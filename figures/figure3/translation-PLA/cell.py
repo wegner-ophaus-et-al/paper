@@ -210,7 +210,7 @@ class Cell:
 
     def plot_spot_detection(self, ax):
         if ax is None:
-            fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+            fig, ax = plt.subplots(1, 3, figsize=(10, 5))
             ax_provided = False
         else:
             ax_provided = True
@@ -250,6 +250,10 @@ class Cell:
                 colors="cyan",
                 linewidths=0.5,
             )
+
+        ax[2].imshow(self.spots, cmap="tab20", vmin=0, vmax=self.spots.max())
+        ax[2].set_title("Detected Spots")
+        ax[2].axis("off")
 
         if not ax_provided:
             plt.show()

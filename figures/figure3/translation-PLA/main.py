@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from tqdm import tqdm
 import pandas as pd
-from utils import calculate_area_ratio, statistics
+from utils import calculate_area_ratio, statistics, compare_conditions
 from spots import (
     plot_spot_summary,
     plot_distance_kde,
@@ -20,9 +20,13 @@ from spots import (
 
 data_root = Path(__file__).parent / "data"
 
-color_palette = {"DMSO": "#888888", "CHX": "#66B2DD", "PatA": "#E6A925"}
+color_palette = {
+    "DMSO": "#888888",
+    "CHX": "#224644",
+    "PatA": "#566038",
+}
 
-brightness_threshold = 11000
+brightness_threshold = 9000
 # brightness_threshold = np.percentile(df_int["value"], 50)
 
 spot_sigma = 3
@@ -56,7 +60,7 @@ fig_segmentation, axes_segmentation = plt.subplots(
     nrows=len(cells), ncols=6, figsize=(width_size * 6, height_size * nrows)
 )
 fig_spots_contact, axes_spots_contact = plt.subplots(
-    nrows=len(cells), ncols=2, figsize=(width_size * 2, height_size * nrows)
+    nrows=len(cells), ncols=3, figsize=(width_size * 2, height_size * nrows)
 )
 
 
@@ -361,9 +365,22 @@ for channel in df["image_name"].unique():
     fig_data_path.mkdir(exist_ok=True)
     fig_data.savefig(fig_data_path / f"{channel}_measurements.pdf", transparent=True)
 
-fig_spots = plot_spot_summary(df_spot_cells, color_palette)
-fig_spots.savefig(fig_data_path / "pla_spots_summary.pdf", transparent=True)
-plt.close(fig_spots)
+spot_count_stats = []
+for rna_tpe in ["actin", "vasa"]:
+    df_rna = df_spot_cells[df_spot_cells["rna_type"] == rna_tpe]
+
+    fig_spots = plot_spot_summary(df_rna, color_palette)
+    fig_spots.savefig(
+        fig_data_path / f"pla_spots_summary_{rna_tpe}.pdf", transparent=True
+    )
+    plt.close(fig_spots)
+
+    for row in compare_conditions(df_rna, "number_of_spots"):
+        spot_count_stats.append({"rna_type": rna_tpe, **row})
+
+pd.DataFrame(spot_count_stats).to_csv(
+    data_root / "spot_count_statistics.csv", index=False
+)
 
 fig_kde = plot_distance_kde(df_spot_details, color_palette)
 fig_kde.savefig(

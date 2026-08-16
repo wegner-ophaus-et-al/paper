@@ -76,7 +76,7 @@ def _strip_point(ax, data, y, color_palette):
         x="condition",
         hue="condition",
         palette=color_palette,
-        alpha=0.4,
+        alpha=0.6,
         size=3,
         ax=ax,
     )
@@ -101,7 +101,7 @@ def _strip_point(ax, data, y, color_palette):
 
 def plot_spot_summary(df_cells, color_palette):
     """2-panel strip+point figure: number_of_spots and sum_intensity by condition."""
-    fig, axes = plt.subplots(1, 2, figsize=(4, 2.5))
+    fig, axes = plt.subplots(1, 2, figsize=(3, 2))
 
     _strip_point(axes[0], df_cells, "number_of_spots", color_palette)
     axes[0].set_title("PLA spots per cell")
@@ -123,9 +123,7 @@ def plot_distance_kde(df_spots, color_palette, control_condition="DMSO"):
     control = df_spots[df_spots["condition"] == control_condition]
     rna_types = ["actin", "vasa"]
 
-    fig, axes = plt.subplots(
-        1, len(rna_types), figsize=(5, 2.5), sharex=True, sharey=True
-    )
+    fig, axes = plt.subplots(len(rna_types), 1, figsize=(3, 3))
 
     for ax, rna_type in zip(axes, rna_types):
         subset = control[control["rna_type"] == rna_type]
