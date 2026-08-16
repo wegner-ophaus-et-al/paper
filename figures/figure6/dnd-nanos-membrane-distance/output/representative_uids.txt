@@ -11,9 +11,9 @@ Feature: membrane_mean_intensity
   wt: c122e5e6, 57ca8f0e
 
 Feature: cell_area
-  n_d: 8c18bdcc, 42d87c49
-  tmd-n_d: 2e7f470e, 8ce2752e, 63e74d60, 6bd50132
-  tmd-n_stuffer: 1fb30ab5, 3238fa02
+  n_d: 89dc2a7f, 2ce7a486
+  tmd-n_d: 3da3a4b8, 9207dde0, 95937c45, 514b332a
+  tmd-n_stuffer: 5bf31b13, ce50c85d
   wt: fd732878, c55dfb0a
 
 Feature: dnd_mean_intensity
@@ -41,19 +41,19 @@ Feature: spots_threshold
   wt: ba93b8e3, c122e5e6
 
 Feature: spot_distances_mean
-  n_d: d7a17418, 42d87c49
-  tmd-n_d: 8ce2752e, 68ee1c21, 9f6d5e06, 53dd31d7
-  tmd-n_stuffer: 6fa91eb8, 5bf31b13, ce50c85d, 6bde0b51, 39adbdc1, 1fb30ab5, 1d0a0cd2, e5628f09
+  n_d: 89dc2a7f, 2ce7a486
+  tmd-n_d: 95937c45, 514b332a, d7b2b06c, 6bd50132
+  tmd-n_stuffer: 5bf31b13, ce50c85d, 6bde0b51, 39adbdc1, 1fb30ab5, e5628f09
   wt: ba93b8e3, c001051b
 
 Feature: dnd_membrane_sum_distribution_all
-  n_d: d7a17418, 8c18bdcc
-  tmd-n_d: 9207dde0, 68ee1c21, 63e74d60, ae0ff701
-  tmd-n_stuffer: 5bf31b13, 3238fa02
+  n_d: bdc08d27, 89dc2a7f
+  tmd-n_d: 68ee1c21, 9f6d5e06, 9e2a7f46, 6bd50132
+  tmd-n_stuffer: 5bf31b13, 6bde0b51
   wt: c001051b, c55dfb0a
 
 Feature: dnd_membrane_sum_distribution_spots
-  n_d: d7a17418, 8c18bdcc
-  tmd-n_d: 8ce2752e, 68ee1c21, 63e74d60
-  tmd-n_stuffer: none
-  wt: ba93b8e3, 2bede677, c122e5e6, a90f65cd
+  n_d: 8c18bdcc, 42d87c49
+  tmd-n_d: 9207dde0, 68ee1c21, 63e74d60, 9e2a7f46
+  tmd-n_stuffer: 6fa91eb8, f8080632, 1d0a0cd2, 3238fa02
+  wt: ba93b8e3, 2bede677, c122e5e6, 57ca8f0e, a90f65cd
