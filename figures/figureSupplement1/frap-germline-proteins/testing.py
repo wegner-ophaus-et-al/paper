@@ -61,7 +61,7 @@ for fused_name, exp_path in experiment_dict.items():
 
     exp_protein_name, exp_stage = fused_name.split("_", 2)
     exp = FrapExperiment(exp_path)
-    exp.generate_report(ax=ax[0])
+    # exp.generate_report(ax=ax[0])
 
     tau = exp.fit_params["tau"]
     fit_summary[fused_name] = {
