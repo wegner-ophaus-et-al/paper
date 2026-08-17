@@ -1,0 +1,6 @@
+data/
+output/
+__pycache__/
+representatives/
+.DS_Store
+
