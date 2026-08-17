@@ -1,0 +1,36 @@
+Statistical analysis for dnd_normalized:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.3293, significance = ns, n(no_tdrd7) = 50, n(full_mix) = 50
+	 24hpf stage:
+	 	 test-type = t-test             , p-value = 0.0060, significance = **, n(no_tdrd7) = 50, n(full_mix) = 50
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0050, significance = **, n(no_tdrd7) = 50, n(full_mix) = 50
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0020, significance = **, n(no_tdrd7) = 48, n(full_mix) = 50
+Statistical analysis for nanos_normalized:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.1648, significance = ns, n(no_tdrd7) = 50, n(full_mix) = 50
+	 24hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0003, significance = ***, n(no_tdrd7) = 50, n(full_mix) = 50
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 3.92e-6, significance = ***, n(no_tdrd7) = 50, n(full_mix) = 50
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 2.28e-8, significance = ***, n(no_tdrd7) = 48, n(full_mix) = 50
+Statistical analysis for dnd_normalized_to_full_mix:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.3293, significance = ns, n(no_tdrd7) = 50, n(full_mix) = 50
+	 24hpf stage:
+	 	 test-type = t-test             , p-value = 0.0060, significance = **, n(no_tdrd7) = 50, n(full_mix) = 50
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0050, significance = **, n(no_tdrd7) = 50, n(full_mix) = 50
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0020, significance = **, n(no_tdrd7) = 48, n(full_mix) = 50
+Statistical analysis for nanos_normalized_to_full_mix:
+	 10hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.1648, significance = ns, n(no_tdrd7) = 50, n(full_mix) = 50
+	 24hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 0.0003, significance = ***, n(no_tdrd7) = 50, n(full_mix) = 50
+	 48hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 3.92e-6, significance = ***, n(no_tdrd7) = 50, n(full_mix) = 50
+	 72hpf stage:
+	 	 test-type = Mann-Whitney U test, p-value = 2.28e-8, significance = ***, n(no_tdrd7) = 48, n(full_mix) = 50
