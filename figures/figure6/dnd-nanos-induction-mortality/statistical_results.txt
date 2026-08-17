@@ -1,0 +1,26 @@
+Statistical analysis: % severe or dead by condition
+=======================================================
+
+Each condition has n=3 repeats. scipy.stats.normaltest (used by utils.parametric) requires at least 8 samples per group and raises an error below that, so normality cannot be formally assessed here. All comparisons below therefore use the non-parametric Mann-Whitney U test unconditionally, and an omnibus Kruskal-Wallis test is used in place of a one-way ANOVA.
+Caveat: with n=3 vs n=3, the exact two-sided Mann-Whitney U test has a minimum possible p-value of 0.1, so no pairwise comparison here can reach the conventional p<0.05 threshold. Exact p-values are reported below rather than relying on significance stars alone.
+
+Per-condition summary
+-------------------------------------------------------
+            n_d: n=3, mean= 99.58%, median=100.00%, values=[100.0, 100.0, 98.73]
+        tmd-n_d: n=3, mean= 74.98%, median= 75.41%, values=[75.41, 85.07, 64.44]
+  tmd-n_stuffer: n=3, mean=  3.70%, median=  3.51%, values=[3.51, 5.26, 2.33]
+             wt: n=3, mean=  3.65%, median=  2.38%, values=[2.38, 6.82, 1.74]
+
+Omnibus test across all conditions
+-------------------------------------------------------
+Kruskal-Wallis H-test: H=9.3918, p=0.0245 *
+
+Pairwise comparisons (Mann-Whitney U test)
+-------------------------------------------------------
+    condition A     condition B        U    p-value  stars
+            n_d         tmd-n_d     9.00     0.0765  ns
+            n_d   tmd-n_stuffer     9.00     0.0765  ns
+            n_d              wt     9.00     0.0765  ns
+        tmd-n_d   tmd-n_stuffer     9.00     0.1000  ns
+        tmd-n_d              wt     9.00     0.1000  ns
+  tmd-n_stuffer              wt     5.00     1.0000  ns
