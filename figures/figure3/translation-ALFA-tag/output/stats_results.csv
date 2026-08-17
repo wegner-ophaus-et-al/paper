@@ -1,0 +1,17 @@
+feature,test_type,n_control,n_pata,statistic,p_value,stars
+nucleus_target_expression,Mann-Whitney U test,38,38,624.0,0.31110825330111136,ns
+mean_alfa_cytoplasm,Mann-Whitney U test,38,38,985.0,0.006390594430959904,**
+sum_alfa_cytoplasm,Mann-Whitney U test,38,38,874.0,0.11551294868216645,ns
+cv_alfa_cytoplasm,t-test,38,38,0.742163293692163,0.46033764565028445,ns
+mean_alfa_granules,t-test,38,38,1.9987423101836057,0.049309663509539865,*
+sum_alfa_granules,Mann-Whitney U test,38,38,911.0,0.05019810235281618,ns
+cv_alfa_granules,Mann-Whitney U test,38,38,529.0,0.04551896287581378,*
+mean_alfa_granule_periphery,Mann-Whitney U test,38,38,878.0,0.10621445787336808,ns
+sum_alfa_granule_periphery,Mann-Whitney U test,38,38,961.0,0.013222947171721362,*
+cv_alfa_granule_periphery,Mann-Whitney U test,38,38,676.0,0.6364369669917453,ns
+number_of_spots,Mann-Whitney U test,38,38,1191.5,1.0534102709827595e-06,***
+area_of_spots,Mann-Whitney U test,38,38,1241.0,6.860909572703137e-08,***
+sum_intensity_alfa_spots,Mann-Whitney U test,38,38,1255.0,3.0190876840438944e-08,***
+mean_distance_to_granules,t-test,38,27,0.5866364511305417,0.559544181134001,ns
+MeanRNA_Cytoplasm_Granules_Ratio,Mann-Whitney U test,38,38,721.0,0.9958555225912402,ns
+SumRNA_Cytoplasm_Granules_Ratio,Mann-Whitney U test,38,38,605.0,0.22616961729449847,ns
