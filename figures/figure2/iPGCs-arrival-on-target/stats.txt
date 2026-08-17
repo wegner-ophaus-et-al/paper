@@ -1,0 +1,6 @@
+Ectopic PGC between full mix and mix without tdrd7a
+	 Count full mix: 62
+	 Count w/o tdrd: 55
+	 Test type:      Mann-Whitney U test
+	 p value:        0.44614
+	 stars:          ns
