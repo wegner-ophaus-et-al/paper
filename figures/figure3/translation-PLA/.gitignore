@@ -1,0 +1,12 @@
+__pycache__
+data/2026-05-26 RNAscope after PLA
+data/.DS_Store
+.DS_Store
+data/segmentation_results.pdf
+data/figures
+data/contactsheet_generated_masks.pdf
+data/contactsheet_segmentation_results.pdf
+__marimo__/session
+data/segmentation_results.pdf
+prototype.py
+filtering.py
