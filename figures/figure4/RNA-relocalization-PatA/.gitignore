@@ -1,0 +1,13 @@
+.idea
+__pycache__
+data/Dnd1-GFP_RNAscope_nanos
+data/RNAscope_tdrd7_nanos
+data/.DS_Store
+proto/__marimo__/session
+proto/output
+proto/.DS_Store
+segmentations/.DS_Store
+.DS_Store
+__marimo__/session
+anaconda_projects/db
+proto/.ipynb_checkpoints
